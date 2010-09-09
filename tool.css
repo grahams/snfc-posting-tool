@@ -1,0 +1,41 @@
+
+div#leftColumnDiv {
+    position: absolute;
+
+    width: 50%;
+
+    top: 0px;
+    left: 0px;
+}
+
+div#rightColumnDiv {
+    position: absolute;
+
+    width: 50%;
+
+    top: 0px;
+    right: 0px;
+}
+
+div#hostsDiv {
+    position: relative;
+}
+
+div#locationDiv {
+    position: relative;
+}
+
+div#filmInfoDiv {
+    position: relative;
+}
+
+div#targetsDiv {
+    position: relative;
+}
+
+fieldset#targetsSet {
+}
+
+div#buttonsDiv {
+    position: relative;
+}
