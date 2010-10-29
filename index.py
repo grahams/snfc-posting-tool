@@ -209,7 +209,7 @@ def readConfig(filename):
         name = location.getElementsByTagName('name')[0].childNodes[0].data
         link = location.getElementsByTagName('link')[0].childNodes[0].data
 
-        locationsDict[name] = image
+        locationsDict[name] = link
 
     return document
 
