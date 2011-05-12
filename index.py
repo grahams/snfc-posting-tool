@@ -10,6 +10,7 @@ import cgi
 import cgitb; cgitb.enable(); sys.stderr = sys.stdout
 import traceback
 
+from unidecode import unidecode
 from xml.dom import minidom
 
 from Newsletter import Newsletter
@@ -158,15 +159,15 @@ def generate_form():
 def display_data(form):
     nl = Newsletter(clubCity,
                     clubURL,
-                    form["film"].value,
+                    unidecode(form["film"].value),
                     form["filmURL"].value,
                     form["hostSelect"].value,
                     hostsDict[form["hostSelect"].value],
                     form["locationSelect"].value,
                     locationsDict[form["locationSelect"].value],
-                    form["wearing"].value,
+                    unidecode(form["wearing"].value),
                     form["showTime"].value,
-                    form["plotSynopsis"].value)
+                    unidecode(form["plotSynopsis"].value))
 
     load_plugins()
 
