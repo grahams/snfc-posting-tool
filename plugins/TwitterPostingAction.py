@@ -3,8 +3,7 @@ from BasePostingAction import BasePostingAction
 
 import cgi
 
-from oauth import oauth
-from oauthtwitter import OAuthApi
+from twitter import *
 
 class TwitterPostingAction(BasePostingAction):
     pluginName = "Twitter"
@@ -20,9 +19,8 @@ class TwitterPostingAction(BasePostingAction):
         OAuthUserToken = self.readConfigValue('OAuthUserToken')
         OAuthUserTokenSecret = self.readConfigValue('OAuthUserTokenSecret')
 
-        api = OAuthApi(OAuthConsumerKey, OAuthConsumerSecret, 
-                       OAuthUserToken, OAuthUserTokenSecret)
+        t = Twitter( auth=OAuth(OAuthUserToken, OAuthUserTokenSecret, OAuthConsumerKey, OAuthConsumerSecret) )
 
-        api.UpdateStatus(nl.generateTwitter())
+        t.statuses.update(status=nl.generateTwitter())
 
         print "Posted to the <a href='http://twitter.com/" + accountName + "'>SNFC Twitter Account</a><br />"
