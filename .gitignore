@@ -2,3 +2,5 @@
 .*.swp
 .htaccess
 .postingtoolrc
+.client_secret.json
+credentials.dat
