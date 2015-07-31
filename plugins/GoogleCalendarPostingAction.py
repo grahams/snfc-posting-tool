@@ -5,11 +5,18 @@ try:
   from xml.etree import ElementTree # for Python 2.5 users
 except ImportError:
   from elementtree import ElementTree
-import gdata.calendar.service
-import gdata.service
-import atom.service
-import gdata.calendar
-import atom
+
+from apiclient.discovery import build
+from oauth2client.file import Storage
+from oauth2client.client import AccessTokenRefreshError
+from oauth2client.client import OAuth2WebServerFlow
+from oauth2client.tools import run_flow
+from oauth2client.client import flow_from_clientsecrets
+import httplib2
+
+import gdata.calendar.data
+import gdata.calendar.client
+
 import getopt
 import sys
 import string
@@ -24,9 +31,7 @@ class GoogleCalendarPostingAction(BasePostingAction):
 
     def execute(self, config, nl):
         self.config = config
-        email = self.readConfigValue('email')
-        password = self.readConfigValue('password')
-        path = self.readConfigValue('path')
+        calendarId = self.readConfigValue('calendarId')
         titleText = self.readConfigValue('titleText')
 
         dateString = nl.nextSunday.strftime("%FT")
@@ -40,26 +45,46 @@ class GoogleCalendarPostingAction(BasePostingAction):
             minutes = 0;
 
         # adjust for 24 hour clock and DST if neccessary
-        hours += 12 + 5 - nl.nextSunday.dst
+        hours += 12 
 
-        start_time = "%s%.2d:%.2d:00.000Z" % (dateString, hours, minutes)
-        end_time = "%s%.2d:%.2d:00.000Z" % (dateString, hours + 4, minutes)
+        start_time = "%s%.2d:%.2d:00.000" % (dateString, hours, minutes)
+        end_time = "%s%.2d:%.2d:00.000" % (dateString, hours + 3, minutes)
 
         nlText = str(nl.generatePlainText())
 
-        event = gdata.calendar.CalendarEventEntry()
-        event.title = atom.Title(text=nl.film + titleText)
-        event.content = atom.Content(text=nlText)
-        event.where.append(gdata.calendar.Where(value_string=nl.location))
+        event = {
+          'summary': nl.film + titleText,
+          'location': nl.location,
+          'description': nlText,
+          'start': {
+            'dateTime': start_time,
+            'timeZone': 'America/New_York',
+          },
+          'end': {
+            'dateTime': end_time,
+            'timeZone': 'America/New_York',
+          },
+        }
 
-        event.when.append(gdata.calendar.When(start_time=start_time, end_time=end_time))
+        scope = 'https://www.googleapis.com/auth/calendar'
+        flow = flow_from_clientsecrets('/usr/share/wordpress/tool/boston/.client_secret.json', scope=scope)
 
-        calendar_service = gdata.calendar.service.CalendarService()
-        calendar_service.email = email
-        calendar_service.password = password
-        calendar_service.source = 'Google-Calendar_Python_Sample-1.0'
-        calendar_service.ProgrammaticLogin()
+        storage = Storage('/usr/share/wordpress/tool/boston/credentials.dat')
+        credentials = storage.get()
 
-        new_event = calendar_service.InsertEvent(event, path)
+        class fakeargparse(object):  # fake argparse.Namespace
+            noauth_local_webserver = True
+            logging_level = "ERROR"
+        flags = fakeargparse()
 
-        print 'Posted to <a href="' + new_event.GetHtmlLink().href + '">Google Calendar</a><br />'
+        if credentials is None or credentials.invalid:
+            credentials = run_flow(flow, storage, flags)
+
+        http = httplib2.Http()
+        http = credentials.authorize(http)
+        service = build('calendar', 'v3', http=http)
+
+        new_event = service.events().insert(calendarId=calendarId, body=event).execute()
+
+        print 'Posted to <a href="' + str(new_event.get('htmlLink')) + '">Google Calendar</a><br />'
+

@@ -91,7 +91,7 @@ def generate_form():
     page.fieldset( id="locationSet" )
 
     page.legend("Locations:")
-    page.select.open(size=5, name="locationSelect")
+    page.select.open(size=9, name="locationSelect")
     page.option(locationsDict)
     page.select.close()
 
@@ -183,7 +183,7 @@ def display_data(form):
         except:
             print "Error in " + plugin.pluginName + "<br>"
             print "<pre>"
-            traceback.print_exc()
+            traceback.print_exc(file=sys.stdout)
             print "</pre>"
 
 # read the configuration xml

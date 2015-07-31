@@ -58,7 +58,7 @@ class Newsletter:
         return subject
 
     def generateHTML(self):
-        page = markup.page(mode="loose_html")
+        page = markup.page(mode="loose_html", separator="")
 
         page.p.open()
         page.add("Join the ")
