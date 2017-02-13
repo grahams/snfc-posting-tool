@@ -80,7 +80,8 @@ class GoogleCalendarPostingAction(BasePostingAction):
         if credentials is None or credentials.invalid:
             credentials = run_flow(flow, storage, flags)
 
-        http = httplib2.Http()
+        http = httplib2.Http(ca_certs="/etc/ssl/certs/ca-certificates.crt")
+        http.add_certificate
         http = credentials.authorize(http)
         service = build('calendar', 'v3', http=http)
 

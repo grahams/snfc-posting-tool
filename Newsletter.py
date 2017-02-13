@@ -91,7 +91,7 @@ class Newsletter:
 
         page.add( self.wearing )
 
-        page.add("in the theatre lobby about 15 minutes "
+        page.add(" in the theatre lobby about 15 minutes "
                  "before the film.  As always, after the film we will "
                  "descend on a local establishment for "
                  "dinner/drinks/discussion.")

@@ -2,7 +2,8 @@ from Newsletter import Newsletter
 from BasePostingAction import BasePostingAction
 
 import warnings
-import livejournal
+
+from lj import lj
 
 class LiveJournalPostingAction(BasePostingAction):
     pluginName = "LiveJournal Community"
@@ -22,8 +23,9 @@ class LiveJournalPostingAction(BasePostingAction):
 
         props = {'opt_preformatted': True}
 
-        lj = livejournal.LiveJournal("SNFC-LJ-Tool/1.0")
-        lj.login(username, password)
-        lj.postevent(content, subject=subject, usejournal=unicode(communityName), props=props)
+        ljclient = lj.LJServer("SNFC-LJ-Tool/1.0",
+                "https://github.com/grahams/snfc-posting-tool; info@sundaynightfilmclub.com")
+        ljclient.login(username, password)
+        ljclient.postevent(content, subject=subject, usejournal=unicode(communityName), props=props)
 
         print "Posted to the <a href='http://community.livejournal.com/" + communityName + "/'>" + communityName + " LiveJournal</a> <br />"
