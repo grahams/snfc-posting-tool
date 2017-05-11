@@ -63,8 +63,9 @@ def generate_form():
     page = markup.page()
     
     page.init(title=clubCity + " SNFC Newsletter Tool",
-              css=('tool.css'))
-
+              css=('tool.css'),
+              script=['js/jquery-3.2.1.min.js',
+                      'js/main.js'])
 
     page.div( id="leftColumnDiv" )
 
@@ -117,7 +118,8 @@ def generate_form():
 
     page.add("Plot Synopsis:")
     page.br()
-    page.textarea.open(name="plotSynopsis", rows=10, cols=40)
+    page.textarea.open(name="plotSynopsis", rows=10, cols=40,
+            id="synopsisArea")
     page.textarea.close()
 
     page.fieldset.close()
