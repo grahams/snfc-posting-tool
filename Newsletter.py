@@ -113,7 +113,8 @@ class Newsletter:
     def generateTwitter(self):
         resultText =  '"' + self.film + '" @ ' + self.location + '. '
         resultText += self.nextSunday.strftime("%A, %b %e") + self.daySuffix 
-        resultText += " at " + self.showTime
+        resultText += " at " + self.showTime + ". Look for your host, " 
+        resultText += self.host + "."
 
         return resultText
 
