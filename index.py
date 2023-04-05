@@ -64,7 +64,7 @@ def generate_form():
     
     page.init(title=clubCity + " SNFC Newsletter Tool",
               css=('tool.css'),
-              script=['js/jquery-3.2.1.min.js',
+              script=['js/jquery-3.6.4.min.js',
                       'js/main.js'])
 
     page.div( id="leftColumnDiv" )
