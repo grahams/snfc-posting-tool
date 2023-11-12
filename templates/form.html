@@ -1,0 +1,75 @@
+<!DOCTYPE HTML PUBLIC '-//W3C//DTD HTML 4.01 Transitional//EN'>
+<html lang="en">
+    <head>
+        <link media="all" href="static/tool.css" type="text/css" rel="stylesheet" />
+        <title>Boston SNFC Newsletter Tool</title>
+        <script src="static/js/jquery-3.7.1.min.js" type="text/javascript"></script>
+        <script src="static/js/main.js" type="text/javascript"></script>
+    </head>
+
+    <body>
+        <div id="leftColumnDiv">
+            <div id="hostsDiv">
+                <fieldset id="hostsFieldSet">
+                <legend>Choose a host:</legend>
+                <form action="/" method="post">
+                <select name="hostSelect" size="{{ hostsDict.length }}">
+                    {% for item in hostsDict %}
+                        <option>{{ item.name }}</option>
+                    {% endfor %}
+                </select>
+                <br />
+                <br />
+                Wearing: 
+                <input type="text" name="wearing" value="a nametag" />
+                </fieldset>
+            </div>
+            <div id="locationDiv">
+                <fieldset id="locationSet">
+                <legend>Locations:</legend>
+                <select name="locationSelect" size="{{ locationDict.length }}">
+                    {% for item in locationDict %}
+                        <option>{{ item.name }}</option>
+                    {% endfor %}
+                </select>
+                </fieldset>
+            </div>
+            <div id="filmInfoDiv">
+                <fieldset id="filmInfoSet">
+                    <legend>Film Information:</legend>
+                    Film: 
+                    <input type="text" name="film" />
+                    <br />
+                    Film URL: 
+                    <input type="text" name="filmURL" />
+                    <br />
+                    Showtime: 
+                    <input type="text" name="showTime" />
+                    <br />
+                    Plot Synopsis:
+                    <br />
+                    <textarea id="synopsisArea" rows="10" name="plotSynopsis" cols="40">
+                    </textarea>
+                </fieldset>
+            </div>
+        </div>
+        <div id="rightColumnDiv">
+            <div id="targetsDiv">
+                <fieldset id="targetsSet">
+                <legend>Where should I post to?</legend>
+                    {% for item in pluginList %}
+                        <input checked="checked" type="checkbox" name="plugins" value="{{ item }}" />{{ item }}<br />  
+                    {% endfor %}
+                </fieldset>
+            </div>
+            <div id="buttonsDiv">
+                <fieldset id="buttonsSet">
+                    <input type="hidden" name="Submit" value="send" />
+                    <input type="submit" value="Enter" />
+                    <input type="reset" />
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,10 +1,10 @@
 # Import the sys module and add MX to the path.
 import sys
 
-from mx.DateTime import *
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
 import re
 import markup
-import string
 import textwrap
 
 class Newsletter:
@@ -22,7 +22,7 @@ class Newsletter:
     daySuffix = "th"
 
     # determine whatever the next sunday is
-    nextSunday = now() + RelativeDateTime(weekday=(Sunday,0))
+    nextSunday = datetime.now() + relativedelta(weekday=6)
 
     def __init__(self, city, clubURL, film, filmURL,
                  host, hostURL, 
@@ -53,7 +53,7 @@ class Newsletter:
 
     def generateSubject(self):
         subject = '"' + self.film + '" - '
-        subject += self.nextSunday.strftime("%b %e") + self.daySuffix
+        subject += self.nextSunday.strftime("%b %d") + self.daySuffix
 
         return subject
 
@@ -102,9 +102,8 @@ class Newsletter:
 
         # hacky attempt at breaking synopsis up into paragraphs...
         r = re.compile("^\r$", re.MULTILINE)
-        uni = unicode(self.synopsis, 'latin-1')
 
-        syn = r.split(uni.encode('utf-8', 'replace'))
+        syn = r.split(self.synopsis)
 
         page.p(syn)
 

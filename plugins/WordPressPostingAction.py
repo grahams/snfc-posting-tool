@@ -1,7 +1,9 @@
+import requests
+import json
+import base64
+
 from Newsletter import Newsletter
 from BasePostingAction import BasePostingAction
-
-import wordpresslib
 
 class WordPressPostingAction(BasePostingAction):
     pluginName = "SNFC Site"
@@ -13,21 +15,23 @@ class WordPressPostingAction(BasePostingAction):
 
         username = self.readConfigValue('username')
         password = self.readConfigValue('password')
-        xmlrpc = self.readConfigValue('xmlrpc')
+        jsonApiUrl = self.readConfigValue('jsonApiUrl')
         blogId = self.readConfigValue('blogId')
         url = self.readConfigValue('url')
 
-        wp = wordpresslib.WordPressClient(xmlrpc, username, password)
-        wp.selectBlog(0)
+        wpCredentials = f"{username}:{password}"
+        wpToken = base64.b64encode(wpCredentials.encode())
+        wpHeader = {'Authorization': 'Basic ' + wpToken.decode('utf-8')}
 
-        post = wordpresslib.WordPressPost()
+        data = {
+            "title":f"{nl.generateSubject()}",
+            "content":f"{nl.generateHTML()}",
+            "status": "publish"
+        }
 
-        post.title = nl.generateSubject()
-        post.description = str(nl.generateHTML())
-        post.categories = (wp.getCategoryIdFromName('Newsletters'),)
+        response = requests.post(jsonApiUrl,headers=wpHeader, json=data)
+        response = json.loads(response.text);
 
-        idPost = wp.newPost(post, True)
-
-        pURL = url + "?p=" + str(idPost)
-
-        print 'Posted to the <a href="%s">SNFC Webpage</a>.<br />' % pURL 
+        postUrl = response['link']
+        
+        return(f'Posted to the <a href="{postUrl}">SNFC Webpage</a>.<br />')

@@ -6,13 +6,10 @@ class BasePostingAction:
     config = None
 
     def execute(self, config, nl):
-        print "This should do something profound\n\n"
+        print("This should do something profound\n\n")
 
-        print nl.generateHTML()
+        print(nl.generateHTML())
 
     def readConfigValue(self, key):
-        section = self.config.getElementsByTagName(self.configSection)[0]
+        return self.config[self.configSection][key]
 
-        value = section.getElementsByTagName(key)[0].childNodes[0].data
-
-        return value
