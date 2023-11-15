@@ -82,20 +82,18 @@ def index():
 
         load_plugins()
 
-        list = form.getlist("plugins")
+        selected_plugins = form.getlist("plugins")
 
         responses = []
 
-        for x in list:
-            plugin = pluginList[x]
+        for plugin_name in selected_plugins:
+            plugin = pluginList[plugin_name]
     
             try:
                 responses.append(plugin.execute(config, nl))
-            except:
-                responses.append(f"Error in {plugin.pluginName}<br>")
-                responses.append("<pre>")
-                responses.append(traceback.format_exc(file=sys.stdout))
-                responses.append("</pre>")
+            except Exception as e:
+                # print the stack trace to a string and append it to the list
+                responses.append(traceback.format_exc())
 
         return render_template('responses.html', responses=responses)
 
