@@ -1,10 +1,10 @@
 # Import the sys module and add MX to the path.
 import sys
 
+from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
-import markup
 import textwrap
 
 class Newsletter:
@@ -52,159 +52,62 @@ class Newsletter:
             self.daySuffix = "rd"
 
     def generateSubject(self):
-        subject = '"' + self.film + '" - '
-        subject += self.nextSunday.strftime("%b %d") + self.daySuffix
+        subject = f'"{self.film}" - {self.nextSunday.strftime("%b %d")}{self.daySuffix}'
 
         return subject
 
     def generateHTML(self):
-        page = markup.page(mode="loose_html", separator="")
+        env = Environment(loader=FileSystemLoader('templates/'))
+        template = env.get_template('htmlnewsletter.html')
 
-        page.p.open()
-        page.add("Join the ")
-        page.a(self.city + " Sunday Night Film Club", href=self.clubURL)
-        page.add(" this ")
-
-        page.b.open()
-        page.add( self.nextSunday.strftime("%A, %b %e") + self.daySuffix )
-        page.b.close()
-
-        page.add(" at ")
-        
-        page.b.open()
-        page.add(self.showTime)
-        page.b.close()
-
-        page.add(" for ")
-
-        page.a( self.film, href=self.filmURL )
-
-        page.add(" at the ")
-
-        page.a( self.location, href=self.locationURL )
-
-        page.add(". Look for ")
-
-        page.a( self.host, href=self.hostURL )
-
-        page.add(" wearing ")
-
-        page.add( self.wearing )
-
-        page.add(" in the theatre lobby about 15 minutes "
-                 "before the film.  As always, after the film we will "
-                 "descend on a local establishment for "
-                 "dinner/drinks/discussion.")
-        page.p.close()
-
-        # yeah, I break strict HTML, what you gonna make of it?
-        page.add('<lj-cut text="Film Synopsis" />')
-
-        # hacky attempt at breaking synopsis up into paragraphs...
+        # Split synopsis into paragraphs
         r = re.compile("^\r$", re.MULTILINE)
-
         syn = r.split(self.synopsis)
+        synopsis_paragraphs = [textwrap.fill(textwrap.dedent(s).strip(), 70) for s in syn]
 
-        page.p(syn)
+        rendered_template = template.render(
+            city=self.city,
+            clubURL=self.clubURL,
+            nextSunday=self.nextSunday.strftime("%A, %b %e"),
+            daySuffix=self.daySuffix,
+            showTime=self.showTime,
+            film=self.film,
+            filmURL=self.filmURL,
+            location=self.location,
+            locationURL=self.locationURL,
+            host=self.host,
+            hostURL=self.hostURL,
+            wearing=self.wearing,
+            synopsis=synopsis_paragraphs
+        )
 
-        return page
+        return rendered_template
 
     def generateTwitter(self):
-        resultText =  '"' + self.film + '" @ ' + self.location + '. '
-        resultText += self.nextSunday.strftime("%A, %b %e") + self.daySuffix 
-        resultText += " at " + self.showTime + ". Look for your host, " 
-        resultText += self.host + "."
+        resultText = f'"{self.film}" @ {self.location}. {self.nextSunday.strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
 
         return resultText
 
     def generatePlainText(self):
-        resultText = "Join the " + self.city + " Sunday Night Film Club "
+        env = Environment(loader=FileSystemLoader('templates/'))
+        template = env.get_template('textnewsletter.txt')
 
-        resultText += "(" + self.clubURL + ") this "
-
-        resultText += self.nextSunday.strftime("%A, %b %e") + self.daySuffix 
-        resultText += " at " + self.showTime + " for " + self.film 
-
-        resultText += ' at the ' + self.location + ". "
-
-        resultText += 'Look for ' + self.host + " "
-        resultText += "wearing "
-        resultText += self.wearing
-        resultText += " in the theatre lobby about 15 "
-        resultText += "minutes before the film. As always, after the film "
-        resultText += "we will descend on a local establishment for "
-        resultText += "dinner/drinks/discussion.\n\n"
-
-        resultText = textwrap.fill(resultText, 70)
-        resultText += "\n\n"
-        
-        # hacky attempt at breaking synopsis up into paragraphs...
+        # Split synopsis into paragraphs
         r = re.compile("^\r$", re.MULTILINE)
         syn = r.split(self.synopsis)
+        synopsis_paragraphs = [textwrap.fill(textwrap.dedent(s).strip(), 70) for s in syn]
 
-        for x in syn:
-            s = x
-            s = re.sub("\r", "", s)
-            s = re.sub("\n", "", s)
-            s = textwrap.dedent(s).strip()
-            resultText += textwrap.fill(s, 70)
-            resultText += "\n\n"
+        rendered_template = template.render(
+            city=self.city,
+            clubURL=self.clubURL,
+            nextSunday=self.nextSunday.strftime("%A, %b %e"),
+            daySuffix=self.daySuffix,
+            showTime=self.showTime,
+            film=self.film,
+            location=self.location,
+            host=self.host,
+            wearing=self.wearing,
+            synopsis=synopsis_paragraphs
+        )
 
-        return resultText
-
-    def generateCraigslist(self):
-        page = markup.page(mode="xml")
-        page.init( doctype="" )
-
-        page.p.open()
-        page.add("Join the ")
-        page.a(self.city + " Sunday Night Film Club", href=self.clubURL)
-        page.add(" this ")
-
-        page.b.open()
-        page.add( self.nextSunday.strftime("%A, %b %e") + self.daySuffix )
-        page.b.close()
-
-        page.add(" at ")
-        
-        page.b.open()
-        page.add(self.showTime)
-        page.b.close()
-
-        page.add(" for ")
-
-        page.b.open()
-        page.add( self.film )
-        page.b.close()
-
-        page.add(" at the ")
-
-        page.b.open()
-        page.add( self.location )
-        page.b.close()
-
-        page.add(". Look for ")
-
-        page.b.open()
-        page.add( self.host )
-        page.b.close()
-
-        page.add(" wearing ")
-
-        page.add( self.wearing )
-
-        page.add("in the theatre lobby about 15 minutes "
-                 "before the film.  As always, after the film we will "
-                 "descend on a local establishment for "
-                 "dinner/drinks/discussion.")
-        page.p.close()
-
-        page.p.open()
-        page.add("For links, film synopsis, and further details, visit ")
-        page.a("the " + self.city + " Sunday Night Film Club homepage", 
-               href=self.clubURL)
-        page.add(".")
-        page.p.close()
-
-        return page
-
+        return rendered_template
