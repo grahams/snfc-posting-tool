@@ -13,11 +13,11 @@ class WordPressPostingAction(BasePostingAction):
     def execute(self, config, nl):
         self.config = config
 
-        username = self.readConfigValue('username')
-        password = self.readConfigValue('password')
-        jsonApiUrl = self.readConfigValue('jsonApiUrl')
-        blogId = self.readConfigValue('blogId')
-        url = self.readConfigValue('url')
+        username = self.read_config_value('username')
+        password = self.read_config_value('password')
+        jsonApiUrl = self.read_config_value('jsonApiUrl')
+        blogId = self.read_config_value('blogId')
+        url = self.read_config_value('url')
 
         wpCredentials = f"{username}:{password}"
         wpToken = base64.b64encode(wpCredentials.encode())
@@ -29,8 +29,8 @@ class WordPressPostingAction(BasePostingAction):
             "status": "publish"
         }
 
-        response = requests.post(jsonApiUrl,headers=wpHeader, json=data)
-        response = json.loads(response.text);
+        response = requests.post(jsonApiUrl,headers=wpHeader, json=data) # type: ignore
+        response = json.loads(response.text)
 
         postUrl = response['link']
         

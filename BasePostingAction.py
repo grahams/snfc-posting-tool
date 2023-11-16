@@ -10,6 +10,9 @@ class BasePostingAction:
 
         print(nl.generateHTML())
 
-    def readConfigValue(self, key):
-        return self.config[self.configSection][key]
+    def read_config_value(self, key):
+        if self.config:
+            return self.config[self.configSection][key]
+        else:
+            return None
 

@@ -1,6 +1,3 @@
-# Import the sys module and add MX to the path.
-import sys
-
 from jinja2 import Environment, FileSystemLoader
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
@@ -51,12 +48,12 @@ class Newsletter:
         if( (self.nextSunday.day == 3) | (self.nextSunday.day == 23) ):
             self.daySuffix = "rd"
 
-    def generateSubject(self):
+    def generate_subject(self):
         subject = f'"{self.film}" - {self.nextSunday.strftime("%b %d")}{self.daySuffix}'
 
         return subject
 
-    def generateHTML(self):
+    def generate_HTML(self):
         env = Environment(loader=FileSystemLoader('templates/'))
         template = env.get_template('htmlnewsletter.html')
 
@@ -83,12 +80,12 @@ class Newsletter:
 
         return rendered_template
 
-    def generateTwitter(self):
+    def generate_twitter(self):
         resultText = f'"{self.film}" @ {self.location}. {self.nextSunday.strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
 
         return resultText
 
-    def generatePlainText(self):
+    def generate_plain_text(self):
         env = Environment(loader=FileSystemLoader('templates/'))
         template = env.get_template('textnewsletter.txt')
 

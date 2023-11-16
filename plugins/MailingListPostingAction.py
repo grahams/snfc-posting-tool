@@ -13,11 +13,11 @@ class MailingListPostingAction(BasePostingAction):
     def execute(self, config, nl):
         self.config = config 
 
-        sender = self.readConfigValue('sender')
-        recipient = self.readConfigValue('recipient')
-        url = self.readConfigValue('url')
-        smtpUsername = self.readConfigValue('smtpUsername')
-        smtpPassword = self.readConfigValue('smtpPassword')
+        sender = self.read_config_value('sender')
+        recipient = self.read_config_value('recipient')
+        url = self.read_config_value('url')
+        smtpUsername = self.read_config_value('smtpUsername')
+        smtpPassword = self.read_config_value('smtpPassword')
 
         msg = EmailMessage()
         msg['Subject'] = nl.generateSubject()
@@ -28,7 +28,7 @@ class MailingListPostingAction(BasePostingAction):
         msg.add_alternative(str(nl.generateHTML()), subtype='html')
     
         s = smtplib.SMTP_SSL('mail.messagingengine.com', 465)
-        s.login(smtpUsername, smtpPassword)
+        s.login(smtpUsername, smtpPassword) # type: ignore
         s.send_message(msg)
 
         return(f"Posted to the <a href='{url}'>Mailing List</a><br />")

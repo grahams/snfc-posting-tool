@@ -2,10 +2,7 @@
 
 import sys
 import glob
-import markup
 import smtplib
-from email.MIMEMultipart import MIMEMultipart
-from email.MIMEText import MIMEText
 
 from xml.dom import minidom
 
@@ -29,7 +26,7 @@ showTime = "7:00pm"
 synopsis = "This is a test post, ignore it."
 
 # read the configuration xml
-def readConfig(filename):
+def read_config(filename):
     document = minidom.parse(filename)
 
     global clubCity
@@ -67,13 +64,13 @@ sys.path.append("plugins/")
 for x in plugins: 
     className = x.replace(".py","").replace("plugins/","")
 
-    config = readConfig(scriptPath + "/.postingtoolrc")
+    config = read_config(scriptPath + "/.postingtoolrc")
 
     foo = __import__(className, globals(), locals(), [''])
     bar = getattr(foo,className)
 
     obj = bar()
 
-    print obj
+    print(obj)
     obj.execute(config,nl)
 
