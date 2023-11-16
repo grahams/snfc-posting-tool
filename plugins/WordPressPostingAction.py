@@ -24,8 +24,8 @@ class WordPressPostingAction(BasePostingAction):
         wpHeader = {'Authorization': 'Basic ' + wpToken.decode('utf-8')}
 
         data = {
-            "title":f"{nl.generateSubject()}",
-            "content":f"{nl.generateHTML()}",
+            "title":f"{nl.generate_subject()}",
+            "content":f"{nl.generate_HTML()}",
             "status": "publish"
         }
 

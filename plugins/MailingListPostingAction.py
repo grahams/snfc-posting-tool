@@ -20,12 +20,12 @@ class MailingListPostingAction(BasePostingAction):
         smtpPassword = self.read_config_value('smtpPassword')
 
         msg = EmailMessage()
-        msg['Subject'] = nl.generateSubject()
+        msg['Subject'] = nl.generate_subject()
         msg['From'] = sender
         msg['To'] = recipient
-        msg.set_content(nl.generatePlainText())
+        msg.set_content(nl.generate_plain_text())
 
-        msg.add_alternative(str(nl.generateHTML()), subtype='html')
+        msg.add_alternative(str(nl.generate_HTML()), subtype='html')
     
         s = smtplib.SMTP_SSL('mail.messagingengine.com', 465)
         s.login(smtpUsername, smtpPassword) # type: ignore
