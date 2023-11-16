@@ -30,9 +30,10 @@ class GoogleCalendarPostingAction(BasePostingAction):
             return dt.hour, dt.minute
 
     def execute(self, config, nl):
-        """Shows basic usage of the Google Calendar API.
-        Prints the start and name of the next 10 events on the user's calendar.
-        """
+        self.config = config
+
+        calendarId = self.read_config_value('calendarId')
+
         creds = None
         # The file token.json stores the user's access and refresh tokens, and is
         # created automatically when the authorization flow completes for the first
@@ -80,8 +81,10 @@ class GoogleCalendarPostingAction(BasePostingAction):
                 'description': nl.generate_plain_text(),
             }
 
+            
+
             # Post the event to Google Calendar
-            event = service.events().insert(calendarId='primary', body=google_event).execute()
+            event = service.events().insert(calendarId=calendarId, body=google_event).execute()
             url = event.get('htmlLink')
             return(f"Posted to the <a href='{url}'>Calendar</a><br />")
 
