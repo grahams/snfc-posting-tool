@@ -4,5 +4,7 @@
 .postingtoolrc
 .client_secret.json
 credentials.dat
+credentials.json
 .DS_Store
 config.json
+token.json
