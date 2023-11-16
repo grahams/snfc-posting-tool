@@ -15,7 +15,7 @@ scriptPath = os.path.dirname(os.path.abspath(__file__))
 pluginList = {}
 
 # read the configuration 
-def readConfig(filename):
+def read_config(filename):
     # read the configuration from the JSON file
     stream = open(filename, "r")
     config = json.load(stream)
@@ -24,7 +24,7 @@ def readConfig(filename):
     return config
 
 # read the configuration xml
-config = readConfig(os.path.join(scriptPath, "config.json"))
+config = read_config(os.path.join(scriptPath, "config.json"))
 
 def load_plugins():
     global scriptPath
