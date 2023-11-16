@@ -1,9 +1,10 @@
+import smtplib
+
+from email.message import EmailMessage
+from email.utils import make_msgid
+
 from Newsletter import Newsletter
 from BasePostingAction import BasePostingAction
-
-import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 class MailingListPostingAction(BasePostingAction):
     pluginName = "SNFC Mailing List"
@@ -12,26 +13,22 @@ class MailingListPostingAction(BasePostingAction):
     def execute(self, config, nl):
         self.config = config 
 
-        sender = self.readConfigValue('sender')
-        recipient = self.readConfigValue('recipient')
-        url = self.readConfigValue('url')
-    
-        msg = MIMEMultipart("alternative")
-        msg['Subject'] = nl.generateSubject()
+        sender = self.read_config_value('sender')
+        recipient = self.read_config_value('recipient')
+        url = self.read_config_value('url')
+        smtpUsername = self.read_config_value('smtpUsername')
+        smtpPassword = self.read_config_value('smtpPassword')
+
+        msg = EmailMessage()
+        msg['Subject'] = nl.generate_subject()
         msg['From'] = sender
         msg['To'] = recipient
-        msg.preamble = nl.generatePlainText()
-        msg.epilogue = ''
-    
-        plain = MIMEText(str( nl.generatePlainText() ), "plain")
-        html = MIMEText(str( nl.generateHTML() ), "html")
-    
-        msg.attach(plain)
-        msg.attach(html)
-    
-        s = smtplib.SMTP()
-        s.connect()
-        s.sendmail(sender, recipient, msg.as_string())
-        s.close()
+        msg.set_content(nl.generate_plain_text())
 
-        print "Posted to the <a href='" + url + "'>Mailing List</a><br />"
+        msg.add_alternative(str(nl.generate_HTML()), subtype='html')
+    
+        s = smtplib.SMTP_SSL('mail.messagingengine.com', 465)
+        s.login(smtpUsername, smtpPassword) # type: ignore
+        s.send_message(msg)
+
+        return(f"Posted to the <a href='{url}'>Mailing List</a><br />")
