@@ -1,5 +1,5 @@
 FROM python:latest
-WORKDIR /project
 ADD . /project
+WORKDIR /project
 RUN pip install -r requirements.txt
-CMD ["gunicorn","app.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
