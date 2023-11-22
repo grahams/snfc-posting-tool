@@ -12,7 +12,7 @@
             <div id="hostsDiv">
                 <fieldset id="hostsFieldSet">
                 <legend>Choose a host:</legend>
-                <form action="/" method="post">
+                <form method="post">
                 <select name="hostSelect" size="{{ hostsDict.length }}">
                     {% for item in hostsDict %}
                         <option>{{ item.name }}</option>
