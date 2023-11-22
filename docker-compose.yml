@@ -1,12 +1,22 @@
 version: '3.3'
 services:
-    rankme:
+    boston-posting-tool:
         container_name: boston-posting-tool
         image: grahams/snfc-posting-tool:latest
         restart: unless-stopped
         ports:
             - '21367:8000'
         volumes:
-            - './config.json:/project/config.json'
-            - './credentials.json:/project/credentials.json'
-            - './token.json:/project/token.json'
+            - './boston/config.json:/project/config.json'
+            - './boston/credentials.json:/project/credentials.json'
+            - './boston/token.json:/project/token.json'
+    dc-posting-tool:
+        container_name: dc-posting-tool
+        image: grahams/snfc-posting-tool:latest
+        restart: unless-stopped
+        ports:
+            - '21368:8000'
+        volumes:
+            - './dc/config.json:/project/config.json'
+            - './dc/credentials.json:/project/credentials.json'
+            - './dc/token.json:/project/token.json'
