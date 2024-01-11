@@ -57,7 +57,7 @@ class GoogleCalendarPostingAction(BasePostingAction):
         try:
             service = build("calendar", "v3", credentials=creds)
 
-            dateString = nl.nextSunday.strftime("%FT")
+            dateString = nl.get_next_sunday().strftime("%FT")
 
             (hours, minutes) = self.parse_time(nl.showTime)
 
