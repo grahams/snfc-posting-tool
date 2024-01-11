@@ -18,9 +18,6 @@ class Newsletter:
     wearing = ""
     daySuffix = "th"
 
-    # determine whatever the next sunday is
-    nextSunday = datetime.now() + relativedelta(weekday=6)
-
     def __init__(self, city, clubURL, film, filmURL,
                  host, hostURL, 
                  location, locationURL, 
@@ -37,19 +34,18 @@ class Newsletter:
         self.wearing = wearing.strip()
         self.showTime = showTime.strip()
         self.synopsis = synopsis.strip()
+        self.daySuffix = self.get_date_suffix(self.get_next_sunday().day)
 
-        if( (self.nextSunday.day == 1) | (self.nextSunday.day == 21) | 
-            (self.nextSunday.day == 31) ):
-            self.daySuffix = "st"
+    def get_next_sunday(self):
+        # determine whatever the next sunday is
+        nextSunday = datetime.now() + relativedelta(weekday=6)
+        return nextSunday
 
-        if( (self.nextSunday.day == 2) | (self.nextSunday.day == 22) ):
-            self.daySuffix = "nd"
-
-        if( (self.nextSunday.day == 3) | (self.nextSunday.day == 23) ):
-            self.daySuffix = "rd"
+    def get_date_suffix(self, d):
+        return {1:'st',2:'nd',3:'rd'}.get(d%20, 'th')
 
     def generate_subject(self):
-        subject = f'"{self.film}" - {self.nextSunday.strftime("%b %d")}{self.daySuffix}'
+        subject = f'"{self.film}" - {self.get_next_sunday().strftime("%b %d")}{self.daySuffix}'
 
         return subject
 
@@ -65,7 +61,7 @@ class Newsletter:
         rendered_template = template.render(
             city=self.city,
             clubURL=self.clubURL,
-            nextSunday=self.nextSunday.strftime("%A, %b %e"),
+            nextSunday=self.get_next_sunday().strftime("%A, %b %e"),
             daySuffix=self.daySuffix,
             showTime=self.showTime,
             film=self.film,
@@ -81,7 +77,7 @@ class Newsletter:
         return rendered_template
 
     def generate_twitter(self):
-        resultText = f'"{self.film}" @ {self.location}. {self.nextSunday.strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
+        resultText = f'"{self.film}" @ {self.location}. {self.get_next_sunday().strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
 
         return resultText
 
@@ -97,7 +93,7 @@ class Newsletter:
         rendered_template = template.render(
             city=self.city,
             clubURL=self.clubURL,
-            nextSunday=self.nextSunday.strftime("%A, %b %e"),
+            nextSunday=self.get_next_sunday().strftime("%A, %b %e"),
             daySuffix=self.daySuffix,
             showTime=self.showTime,
             film=self.film,
