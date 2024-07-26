@@ -1,4 +1,5 @@
 from datetime import datetime
+import dateparser
 import os
 
 from google.auth.transport.requests import Request
@@ -16,18 +17,10 @@ class GoogleCalendarPostingAction(BasePostingAction):
     configSection = "googleCalendar"
     config = None
 
-    from datetime import datetime
-
     def parse_time(self, t):
-        if 'p' in t:
-            t = t.replace('p', '')
-            format = '%I%M' if ':' not in t else '%I:%M'
-            dt = datetime.strptime(t, format)
-            return (dt.hour + 12) % 24, dt.minute
-        else:
-            format = '%H%M' if ':' not in t else '%H:%M'
-            dt = datetime.strptime(t, format)
-            return dt.hour, dt.minute
+        dt = dateparser.parse(t)
+
+        return dt.hour, dt.minute
 
     def execute(self, config, nl):
         self.config = config
