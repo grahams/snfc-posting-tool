@@ -1,6 +1,6 @@
 from datetime import datetime
-import dateparser
 import os
+import re
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -18,9 +18,26 @@ class GoogleCalendarPostingAction(BasePostingAction):
     config = None
 
     def parse_time(self, t):
-        dt = dateparser.parse(t)
+        p = re.search('^([0-1]?)([0-9])(:?)([0-9]{0,2})([aAPp]?.?)', t)
 
-        return dt.hour, dt.minute
+        if p is None:
+            raise ValueError("Invalid time format")
+
+        tens = p.group(1)
+        hour = p.group(2)
+        minute = p.group(4)
+        ampm = p.group(5)
+
+        if tens == '':
+            hour = '0' + hour
+        
+        if minute == '':
+            minute = '00'
+        
+        if ampm.startswith('p') or ampm.startswith('P'):
+            hour = int(hour) + 12
+
+        return int(hour), int(minute)
 
     def execute(self, config, nl):
         self.config = config
@@ -53,9 +70,6 @@ class GoogleCalendarPostingAction(BasePostingAction):
             dateString = nl.get_next_sunday().strftime("%FT")
 
             (hours, minutes) = self.parse_time(nl.showTime)
-
-            if hours < 12:
-                hours += 12
 
             start_time = "%s%.2d:%.2d:00.000" % (dateString, hours, minutes)
             end_time = "%s%.2d:%.2d:00.000" % (dateString, hours + 3, minutes)
