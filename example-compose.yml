@@ -1,0 +1,48 @@
+services:
+    boston-posting-tool:
+        container_name: boston-posting-tool
+        image: grahams/snfc-posting-tool:latest
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.tool-boston.rule=Host(`tool.sundaynightfilmclub.com`) && PathPrefix(`/tool/boston`)"
+            - "traefik.http.routers.tool-boston.entrypoints=https"
+            - "traefik.http.routers.tool-boston.tls=true"
+            - "traefik.http.routers.tool-boston.tls.certresolver=namecheap"
+            - "traefik.http.routers.tool-boston.tls.domains[0].main=tool.sundaynightfilmclub.com"
+            - "traefik.http.routers.tool-boston.tls.domains[0].sans=*.tool.sundaynightfilmclub.com"
+            - "traefik.http.routers.tool-boston.middlewares=tool-boston-stripprefix"
+            - "traefik.http.middlewares.tool-boston-stripprefix.stripprefix.prefixes=/tool/boston"
+            - "traefik.http.services.tool-boston.loadbalancer.server.port=8000"
+        volumes:
+            - '/opt/docker/data/tool.sundaynightfilmclub.com/boston/config.json:/project/config.json'
+            - '/opt/docker/data/tool.sundaynightfilmclub.com/boston/credentials.json:/project/credentials.json'
+            - '/opt/docker/data/tool.sundaynightfilmclub.com/boston/token.json:/project/token.json'
+        networks:
+            - proxy
+
+    dc-posting-tool:
+        container_name: dc-posting-tool
+        image: grahams/snfc-posting-tool:latest
+        restart: unless-stopped
+        labels:
+            - "traefik.enable=true"
+            - "traefik.http.routers.tool-dc.rule=Host(`tool.sundaynightfilmclub.com`) && PathPrefix(`/tool/dc`)"
+            - "traefik.http.routers.tool-dc.entrypoints=https"
+            - "traefik.http.routers.tool-dc.tls=true"
+            - "traefik.http.routers.tool-dc.tls.certresolver=namecheap"
+            - "traefik.http.routers.tool-dc.tls.domains[0].main=tool.sundaynightfilmclub.com"
+            - "traefik.http.routers.tool-dc.tls.domains[0].sans=*.tool.sundaynightfilmclub.com"
+            - "traefik.http.routers.tool-dc.middlewares=tool-dc-stripprefix"
+            - "traefik.http.middlewares.tool-dc-stripprefix.stripprefix.prefixes=/tool/dc"
+            - "traefik.http.services.tool-dc.loadbalancer.server.port=8000"
+        volumes:
+            - '/opt/docker/data/tool.sundaynightfilmclub.com/dc/config.json:/project/config.json'
+            - '/opt/docker/data/tool.sundaynightfilmclub.com/dc/credentials.json:/project/credentials.json'
+            - '/opt/docker/data/tool.sundaynightfilmclub.com/dc/token.json:/project/token.json'
+        networks:
+            - proxy
+
+networks:
+    proxy:
+        external: true
