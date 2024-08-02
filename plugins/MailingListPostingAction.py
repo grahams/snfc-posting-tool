@@ -18,6 +18,8 @@ class MailingListPostingAction(BasePostingAction):
         url = self.read_config_value('url')
         smtpUsername = self.read_config_value('smtpUsername')
         smtpPassword = self.read_config_value('smtpPassword')
+        smtpHostname = self.read_config_value('smtpHostname')
+        smtpPort = self.read_config_value('smtpPort')
 
         msg = EmailMessage()
         msg['Subject'] = nl.generate_subject()
@@ -27,8 +29,8 @@ class MailingListPostingAction(BasePostingAction):
 
         msg.add_alternative(str(nl.generate_HTML()), subtype='html')
     
-        s = smtplib.SMTP_SSL('mail.messagingengine.com', 465)
-        s.login(smtpUsername, smtpPassword) # type: ignore
+        s = smtplib.SMTP_SSL(smtpHostname, smtpPort)
+        s.login(smtpUsername, smtpPassword)
         s.send_message(msg)
 
         return(f"Posted to the <a href='{url}'>Mailing List</a><br />")
