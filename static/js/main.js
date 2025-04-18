@@ -36,7 +36,7 @@ $(document).ready(function () {
 
 		searchTimeout = setTimeout(() => {
 			$.ajax({
-				url: `/api/omdb/search?q=${encodeURIComponent(searchTerm)}`,
+				url: `api/omdb/search?q=${encodeURIComponent(searchTerm)}`,
 				method: 'GET',
 				success: function (response) {
 					if (response.Response === "True") {
@@ -104,7 +104,7 @@ $(document).ready(function () {
 		const imdbID = $(this).data('imdbid');
 
 		$.ajax({
-			url: `/api/omdb/movie?id=${imdbID}`,
+			url: `api/omdb/movie?id=${imdbID}`,
 			method: 'GET',
 			success: function (response) {
 				if (response.Response === "True") {
