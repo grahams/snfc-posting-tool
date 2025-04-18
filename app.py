@@ -1,6 +1,6 @@
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, jsonify
 from Newsletter import Newsletter
-
+import requests
 import glob
 import os
 import traceback
@@ -8,23 +8,13 @@ import sys
 import json
 
 app = Flask(__name__)
-
-config = None
 scriptPath = os.path.dirname(os.path.abspath(__file__))
 
+# Initialize config at module level
+with open(os.path.join(scriptPath, "config.json"), "r") as f:
+    config = json.load(f)
+
 pluginList = {}
-
-# read the configuration 
-def read_config(filename):
-    # read the configuration from the JSON file
-    stream = open(filename, "r")
-    config = json.load(stream)
-    stream.close()
-
-    return config
-
-# read the configuration xml
-config = read_config(os.path.join(scriptPath, "config.json"))
 
 def load_plugins():
     global scriptPath
@@ -48,6 +38,26 @@ def load_plugins():
 
         # add the plugin to the list
         pluginList[ cls().pluginName ] = cls()
+
+@app.route('/api/omdb/search')
+def omdb_search():
+    query = request.args.get('q', '')
+    if not query:
+        return jsonify({'error': 'Search query is required'}), 400
+    
+    api_key = config['omdb']['apiKey']
+    response = requests.get(f'http://www.omdbapi.com/?apikey={api_key}&s={query}&type=movie')
+    return jsonify(response.json())
+
+@app.route('/api/omdb/movie')
+def omdb_movie():
+    imdb_id = request.args.get('id', '')
+    if not imdb_id:
+        return jsonify({'error': 'IMDB ID is required'}), 400
+    
+    api_key = config['omdb']['apiKey']
+    response = requests.get(f'http://www.omdbapi.com/?apikey={api_key}&i={imdb_id}&plot=full')
+    return jsonify(response.json())
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
