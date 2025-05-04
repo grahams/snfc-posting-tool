@@ -77,7 +77,6 @@ def index():
                 break
             locationIndex += 1
 
-
         nl = Newsletter(config['clubCity'],
                         config['clubURL'],
                         form["film"],
@@ -93,29 +92,41 @@ def index():
         load_plugins()
 
         selected_plugins = form.getlist("plugins")
-
-        responses = []
+        results = []
 
         for plugin_name in selected_plugins:
             plugin = pluginList[plugin_name]
     
             try:
-                responses.append(plugin.execute(config, nl))
+                response = plugin.execute(config, nl)
+                results.append({
+                    'plugin': plugin_name,
+                    'success': True,
+                    'message': response,
+                    'url': extract_url(response) if response else None
+                })
             except Exception as e:
-                # print the stack trace to a string and append it to the list
-                responses.append(traceback.format_exc())
+                results.append({
+                    'plugin': plugin_name,
+                    'success': False,
+                    'message': str(e),
+                    'url': None
+                })
 
-        return render_template('responses.html', responses=responses)
+        return jsonify(results)
 
     else:
         load_plugins()
-
-        plugNames = []
-
-        for item in pluginList:
-            plugNames.append(item)
-
+        plugNames = [item for item in pluginList]
         return render_template('form.html', pluginList=plugNames, hostsDict=config['hosts'], locationDict=config['locations'])
+
+def extract_url(text):
+    # Extract URL from HTML response
+    import re
+    match = re.search(r'href=[\'"]?([^\'" >]+)', text)
+    if match:
+        return match.group(1)
+    return None
 
 if __name__ == '__main__':
     app.run(debug=True)

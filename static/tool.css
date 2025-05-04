@@ -169,10 +169,30 @@ div#buttonsDiv {
     display: block;
     padding: 8px 0;
     cursor: pointer;
+    position: relative;
 }
 
 .checkbox-label input[type="checkbox"] {
     margin-right: 8px;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-left: 10px;
+    vertical-align: middle;
+    font-size: 16px;
+    line-height: 20px;
+    text-align: center;
+}
+
+.status-success {
+    color: #4CAF50;
+}
+
+.status-error {
+    color: #f44336;
 }
 
 #targetsSet {

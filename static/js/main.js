@@ -125,4 +125,78 @@ $(document).ready(function () {
 			selectedIndex = -1;
 		}
 	});
+
+	// Form submission handling
+	$("#postingForm").on('submit', function (e) {
+		e.preventDefault();
+		console.log('Form submitted');
+
+		// Clear any existing status indicators
+		clearStatusIndicators();
+
+		// Get all checked plugins
+		const checkedPlugins = $('input[name="plugins"]:checked').map(function () {
+			return $(this).val();
+		}).get();
+
+		console.log('Checked plugins:', checkedPlugins);
+
+		// Submit the form normally
+		const formData = new FormData(this);
+
+		$.ajax({
+			url: '/',
+			method: 'POST',
+			data: formData,
+			processData: false,
+			contentType: false,
+			success: function (results) {
+				console.log('Response received:', results);
+
+				// Update status indicators based on results
+				results.forEach(result => {
+					console.log('Processing result:', result);
+
+					const statusIndicator = $(`.checkbox-label:contains('${result.plugin}') .status-indicator`);
+					console.log('Status indicator element:', statusIndicator);
+
+					if (statusIndicator.length > 0) {
+						if (result.success) {
+							statusIndicator.html('✓').addClass('status-success');
+							// If there's a URL, add it as a tooltip
+							if (result.url) {
+								statusIndicator.attr('title', result.url);
+							}
+						} else {
+							statusIndicator.html('✗').addClass('status-error');
+							statusIndicator.attr('title', result.message);
+						}
+					} else {
+						console.log('Could not find status indicator for:', result.plugin);
+					}
+				});
+			},
+			error: function (xhr, status, error) {
+				console.log('Error submitting form:', error);
+				// Mark all checked plugins as failed
+				checkedPlugins.forEach(plugin => {
+					const statusIndicator = $(`.checkbox-label:contains('${plugin}') .status-indicator`);
+					statusIndicator.html('✗').addClass('status-error');
+				});
+			}
+		});
+	});
+
+	// Handle form reset
+	$("#postingForm").on('reset', function () {
+		clearStatusIndicators();
+	});
+
+	// Helper function to clear all status indicators
+	function clearStatusIndicators() {
+		$('.status-indicator')
+			.html('')
+			.removeClass('status-success status-error')
+			.removeAttr('title');
+	}
 });
