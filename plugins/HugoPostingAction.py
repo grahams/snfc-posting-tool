@@ -1,6 +1,7 @@
 from datetime import datetime
 import os
 import re
+import subprocess
 from BasePostingAction import BasePostingAction
 
 class HugoPostingAction(BasePostingAction):
@@ -12,9 +13,12 @@ class HugoPostingAction(BasePostingAction):
         self.config = config
         
         # Get the Hugo content directory from config
+        hugo_dir = self.read_config_value('hugoDir')
         content_dir = self.read_config_value('contentDir')
         if not content_dir:
             raise ValueError("Hugo content directory not configured")
+        if not hugo_dir:
+            raise ValueError("Hugo site root directory not configured")
 
         # Generate the post filename using the date and film title
         date = nl.get_next_sunday()
@@ -37,4 +41,13 @@ tags: ["newsletter"]
         with open(filepath, 'w') as f:
             f.write(front_matter + nl.generate_markdown())
 
-        return f"Posted to Hugo blog at {filepath}" 
+        # Build the Hugo site
+        try:
+            # Get the Hugo site root directory (parent of content directory)
+            site_root = os.path.dirname(hugo_dir)
+            subprocess.run(['bash', 'hugo_rebuild.sh'], check=True)
+            build_status = " and built successfully"
+        except subprocess.CalledProcessError as e:
+            build_status = f" but Hugo build failed: {str(e)}"
+
+        return f"Posted to Hugo blog at {filepath}{build_status}" 
