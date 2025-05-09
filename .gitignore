@@ -8,3 +8,5 @@ credentials.json
 .DS_Store
 config.json
 token.json
+
+content/**
