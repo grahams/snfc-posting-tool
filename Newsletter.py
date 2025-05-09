@@ -104,3 +104,30 @@ class Newsletter:
         )
 
         return rendered_template
+
+    def generate_markdown(self):
+        env = Environment(loader=FileSystemLoader('templates/'))
+        template = env.get_template('markdownnewsletter.md')
+
+        # Split synopsis into paragraphs
+        r = re.compile("^\r$", re.MULTILINE)
+        syn = r.split(self.synopsis)
+        synopsis_paragraphs = [textwrap.fill(textwrap.dedent(s).strip(), 70) for s in syn]
+
+        rendered_template = template.render(
+            city=self.city,
+            clubURL=self.clubURL,
+            nextSunday=self.get_next_sunday().strftime("%A, %b %e"),
+            daySuffix=self.daySuffix,
+            showTime=self.showTime,
+            film=self.film,
+            filmURL=self.filmURL,
+            location=self.location,
+            locationURL=self.locationURL,
+            host=self.host,
+            hostURL=self.hostURL,
+            wearing=self.wearing,
+            synopsis=synopsis_paragraphs
+        )
+
+        return rendered_template
