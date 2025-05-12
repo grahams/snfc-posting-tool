@@ -8,5 +8,6 @@ credentials.json
 .DS_Store
 config.json
 token.json
+compose.yml
 
 content/**
