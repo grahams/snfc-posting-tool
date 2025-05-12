@@ -69,7 +69,7 @@ class GoogleCalendarPostingAction(BasePostingAction):
 
             dateString = nl.get_next_sunday().strftime("%FT")
 
-            (hours, minutes) = self.parse_time(nl.showTime)
+            (hours, minutes) = self.parse_time(nl.normalize_time(nl.showTime))
 
             start_time = "%s%.2d:%.2d:00.000" % (dateString, hours, minutes)
             end_time = "%s%.2d:%.2d:00.000" % (dateString, hours + 3, minutes)
@@ -85,7 +85,7 @@ class GoogleCalendarPostingAction(BasePostingAction):
                     'dateTime': end_time,
                     'timeZone': 'America/New_York',
                 },
-                'description': nl.generate_plain_text(),
+                'description': nl.generate_HTML(),
             }
 
             

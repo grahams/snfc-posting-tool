@@ -32,7 +32,7 @@ class Newsletter:
         self.location = location.strip()
         self.locationURL = locationURL.strip()
         self.wearing = wearing.strip()
-        self.showTime = showTime.strip()
+        self.showTime = self.normalize_time(showTime)
         self.synopsis = synopsis.strip()
         self.daySuffix = self.get_date_suffix(self.get_next_sunday().day)
 
@@ -43,6 +43,69 @@ class Newsletter:
 
     def get_date_suffix(self, d):
         return {1:'st',2:'nd',3:'rd'}.get(d%20, 'th')
+
+    def normalize_time(self, time_str):
+        """
+        Normalize various time input formats to a standard format (e.g. "7:00 PM").
+        Handles formats like:
+        - 4p, 400p, 4pm, 4:00p, 4:00pm
+        - 400 (assumed PM)
+        - 4:00 PM, 4:00PM
+        - 605pm (6:05 PM)
+        """
+        # Remove any extra whitespace
+        time_str = time_str.strip().lower()
+        print(f"Processing time string: '{time_str}'")
+        
+        # Handle times without separators (e.g. 400, 220)
+        if re.match(r'^(\d{1,4})$', time_str):
+            print("Matched numeric-only pattern")
+            # If it's 3 or 4 digits, assume it's a time without separator
+            if len(time_str) >= 3:
+                # Last two digits are minutes
+                hour = int(time_str[:-2])
+                minute = time_str[-2:]
+                # Since this is an evening club, assume PM
+                return f"{hour}:{minute}pm"
+            else:
+                # assume just an hour
+                hour = time_str
+                # Since this is an evening club, assume PM
+                return f"{hour}:00pm"
+        
+        # Handle times with minutes but no colon (e.g., "605pm", "605p")
+        no_colon_match = re.match(r'^(\d{1,2})(\d{2})([ap]m?)?$', time_str)
+        if no_colon_match:
+            print(f"Matched no-colon pattern: {no_colon_match.groups()}")
+            hour = int(no_colon_match.group(1))
+            minute = no_colon_match.group(2)
+            ampm = no_colon_match.group(3) or 'pm'
+            ampm = 'pm' if ampm.startswith('p') else 'am'
+            hour = hour % 12 or 12
+            return f"{hour}:{minute}{ampm}"
+        
+        # Handle simple format (e.g., "8p", "8pm")
+        simple_match = re.match(r'^(\d{1,2})([ap]m?)?$', time_str)
+        if simple_match:
+            print(f"Matched simple pattern: {simple_match.groups()}")
+            hour = int(simple_match.group(1))
+            ampm = simple_match.group(2) or 'pm'
+            ampm = 'pm' if ampm.startswith('p') else 'am'
+            hour = hour % 12 or 12
+            return f"{hour}:00{ampm}"
+            
+        # Handle complex format (e.g., "8:00pm", "8:00 pm")
+        complex_match = re.match(r'^(\d{1,2}):(\d{2})\s*([ap]m?)?$', time_str)
+        if complex_match:
+            print(f"Matched complex pattern: {complex_match.groups()}")
+            hour = int(complex_match.group(1))
+            minute = complex_match.group(2)
+            ampm = complex_match.group(3) or 'pm'
+            ampm = 'pm' if ampm.startswith('p') else 'am'
+            hour = hour % 12 or 12
+            return f"{hour}:{minute}{ampm}"
+        
+        raise ValueError(f"Invalid time format: {time_str}")
 
     def generate_subject(self):
         subject = f'"{self.film}" - {self.get_next_sunday().strftime("%b %d")}{self.daySuffix}'
@@ -56,7 +119,7 @@ class Newsletter:
         # Split synopsis into paragraphs
         r = re.compile("^\r$", re.MULTILINE)
         syn = r.split(self.synopsis)
-        synopsis_paragraphs = [textwrap.fill(textwrap.dedent(s).strip(), 70) for s in syn]
+        synopsis_paragraphs = [textwrap.dedent(s).strip() for s in syn]
 
         rendered_template = template.render(
             city=self.city,
@@ -88,7 +151,7 @@ class Newsletter:
         # Split synopsis into paragraphs
         r = re.compile("^\r$", re.MULTILINE)
         syn = r.split(self.synopsis)
-        synopsis_paragraphs = [textwrap.fill(textwrap.dedent(s).strip(), 70) for s in syn]
+        synopsis_paragraphs = [textwrap.dedent(s).strip() for s in syn]
 
         rendered_template = template.render(
             city=self.city,
@@ -112,7 +175,7 @@ class Newsletter:
         # Split synopsis into paragraphs
         r = re.compile("^\r$", re.MULTILINE)
         syn = r.split(self.synopsis)
-        synopsis_paragraphs = [textwrap.fill(textwrap.dedent(s).strip(), 70) for s in syn]
+        synopsis_paragraphs = [textwrap.dedent(s).strip() for s in syn]
 
         rendered_template = template.render(
             city=self.city,
