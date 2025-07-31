@@ -65,6 +65,7 @@ tags: ["newsletter"]
             
             # Push to remote
             origin = repo.remote(name='origin')
+            origin.pull()
             origin.push()
             
             build_status = " and pushed to git repository successfully"
