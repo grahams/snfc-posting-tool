@@ -11,3 +11,4 @@ token.json
 compose.yml
 
 content/**
+.ssh/**

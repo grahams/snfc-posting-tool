@@ -16,7 +16,6 @@
 	// "remoteUser": "root",
 	// Mount local directories into the container
 	"mounts": [
-		"source=${localEnv:HOME}/src/blogs/boston.sundaynightfilmclub.com,target=/workspaces/hugo-blog,type=bind,consistency=cached",
-		"source=${localEnv:HOME}/aatemp/id_ed25519_hugo,target=/workspaces/.ssh/id_ed25519,type=bind,consistency=cached"
+		"source=${localEnv:HOME}/src/blogs/boston.sundaynightfilmclub.com,target=/workspaces/hugo-blog,type=bind,consistency=cached"
 	]
 }
