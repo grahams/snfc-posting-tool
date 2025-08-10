@@ -3,6 +3,11 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
 import textwrap
+"""
+Note: Optional dependencies are imported lazily inside methods to avoid
+editor/linter resolution issues when they are not installed in the
+static analysis environment.
+"""
 
 class Newsletter:
     city = ""
@@ -145,52 +150,58 @@ class Newsletter:
         return resultText
 
     def generate_plain_text(self):
-        env = Environment(loader=FileSystemLoader('templates/'))
-        template = env.get_template('textnewsletter.txt')
+        # Generate plain text by converting the rendered HTML to text
+        # Lazy import to avoid import-time errors in environments without bs4
+        try:
+            from bs4 import BeautifulSoup  # type: ignore
+        except ImportError as exc:
+            raise RuntimeError(
+                "beautifulsoup4 is required for plain text generation. Install with 'pip install beautifulsoup4'."
+            ) from exc
 
-        # Split synopsis into paragraphs
-        r = re.compile("^\r$", re.MULTILINE)
-        syn = r.split(self.synopsis)
-        synopsis_paragraphs = [textwrap.dedent(s).strip() for s in syn]
+        html_content = self.generate_HTML()
+        soup = BeautifulSoup(html_content, "html.parser")
 
-        rendered_template = template.render(
-            city=self.city,
-            clubURL=self.clubURL,
-            nextSunday=self.get_next_sunday().strftime("%A, %b %e"),
-            daySuffix=self.daySuffix,
-            showTime=self.showTime,
-            film=self.film,
-            location=self.location,
-            host=self.host,
-            wearing=self.wearing,
-            synopsis=synopsis_paragraphs
-        )
+        # Remove any scripts/styles if present
+        for tag in soup(["script", "style"]):
+            tag.decompose()
 
-        return rendered_template
+        # Preserve link destinations in plain text: "text (url)"
+        for a in soup.find_all('a'):
+            href = a.get('href')
+            text = a.get_text(strip=True)
+            replacement = text if not href else f"{text} ({href})"
+            a.replace_with(replacement)
+
+        # Extract paragraphs and join text within each paragraph using spaces
+        paragraphs = []
+        for p in soup.find_all('p'):
+            para_text = p.get_text(separator=' ', strip=True)
+            para_text = re.sub(r"\s+", " ", para_text)
+            if para_text:
+                paragraphs.append(para_text)
+
+        if paragraphs:
+            text = "\n\n".join(paragraphs)
+        else:
+            # Fallback if no <p> tags
+            text = soup.get_text(separator=' ', strip=True)
+            text = re.sub(r"\s+", " ", text)
+
+        return text
 
     def generate_markdown(self):
-        env = Environment(loader=FileSystemLoader('templates/'))
-        template = env.get_template('markdownnewsletter.md')
+        # Generate Markdown by converting the rendered HTML
+        # Lazy import to avoid import-time errors in environments without markdownify
+        try:
+            from markdownify import markdownify as html_to_markdown  # type: ignore
+        except ImportError as exc:
+            raise RuntimeError(
+                "markdownify is required for markdown generation. Install with 'pip install markdownify'."
+            ) from exc
 
-        # Split synopsis into paragraphs
-        r = re.compile("^\r$", re.MULTILINE)
-        syn = r.split(self.synopsis)
-        synopsis_paragraphs = [textwrap.dedent(s).strip() for s in syn]
+        html_content = self.generate_HTML()
+        markdown = html_to_markdown(html_content, heading_style="ATX")
 
-        rendered_template = template.render(
-            city=self.city,
-            clubURL=self.clubURL,
-            nextSunday=self.get_next_sunday().strftime("%A, %b %e"),
-            daySuffix=self.daySuffix,
-            showTime=self.showTime,
-            film=self.film,
-            filmURL=self.filmURL,
-            location=self.location,
-            locationURL=self.locationURL,
-            host=self.host,
-            hostURL=self.hostURL,
-            wearing=self.wearing,
-            synopsis=synopsis_paragraphs
-        )
-
-        return rendered_template
+        # Trim trailing whitespace/newlines for cleanliness
+        return markdown.strip()
