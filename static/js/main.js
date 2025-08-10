@@ -141,6 +141,18 @@ $(document).ready(function () {
 
 		console.log('Checked plugins:', checkedPlugins);
 
+		// Enforce simple client-side checks when not in manual mode
+		const manual = $useManualHTML.is(":checked");
+		if (!manual) {
+			const filmTitle = $("#filmSearch").val().trim();
+			const filmUrl = $("#filmURL").val().trim();
+			const urlOk = /^https?:\/\/.+/.test(filmUrl);
+			if (!filmTitle || !filmUrl || !urlOk) {
+				alert('Please enter a Film Title and a valid Film URL (starting with http(s)://).');
+				return;
+			}
+		}
+
 		// Submit the form normally
 		const formData = new FormData(this);
 
@@ -211,8 +223,13 @@ $(document).ready(function () {
 
 	function setPreviewContent(html) {
 		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
+		// Strip any script tags to avoid executing arbitrary JS or duplicate var errors
+		let safeHtml = html || '<p style="font-family: sans-serif; color: #777;">No content</p>';
+		try {
+			safeHtml = safeHtml.replace(/<script[\s\S]*?<\/script>/gi, '');
+		} catch (_) { }
 		doc.open();
-		doc.write(html || '<p style="font-family: sans-serif; color: #777;">No content</p>');
+		doc.write(safeHtml);
 		doc.close();
 
 		// If manual editing is enabled, update the hidden field with current HTML so user starts from generated content
@@ -286,6 +303,14 @@ $(document).ready(function () {
 
 		// Enable/disable toolbar
 		$rtToolbar.find('button, select').prop('disabled', !enabled);
+
+		// Disable native form validation when manual editing is enabled
+		const $formEl = $("#postingForm");
+		if (enabled) {
+			$formEl.attr('novalidate', 'novalidate');
+		} else {
+			$formEl.removeAttr('novalidate');
+		}
 	});
 
 	// Listen for edits in the iframe and sync to hidden field

@@ -117,33 +117,47 @@ def index():
     if request.method == 'POST':
         form = request.form
 
-        hostIndex = 0;
+        hostIndex = 0
         locationIndex = 0
         
-        for x in config['hosts']:
-            if x['name'] == form["hostSelect"]:
-                break
-            hostIndex += 1
+        use_manual = str(form.get('useManualHTML', '')).lower() in ('1', 'true', 'yes', 'on')
 
-        for x in config['locations']:
-            if x['name'] == form["locationSelect"]:
-                break
-            locationIndex += 1
+        # Resolve host/location safely; if manual mode, allow empty/missing
+        host_name = form.get("hostSelect", "")
+        location_name = form.get("locationSelect", "")
+
+        if not use_manual:
+            for x in config['hosts']:
+                if x['name'] == host_name:
+                    break
+                hostIndex += 1
+
+            for x in config['locations']:
+                if x['name'] == location_name:
+                    break
+                locationIndex += 1
+
+        # Server-side minimal validation when not in manual mode
+        if not use_manual:
+            if not form.get('film'):
+                return jsonify({'error': 'Film title is required'}), 400
+            film_url_val = form.get('filmURL', '')
+            if not film_url_val or not (film_url_val.startswith('http://') or film_url_val.startswith('https://')):
+                return jsonify({'error': 'Valid Film URL is required'}), 400
 
         nl = Newsletter(config['clubCity'],
                         config['clubURL'],
-                        form["film"],
-                        form["filmURL"],
-                        form["hostSelect"],
-                        config["hosts"][hostIndex]['image'],
-                        form["locationSelect"],
-                        config["locations"][locationIndex]['link'],
-                        form["wearing"],
-                        form["showTime"],
-                        form["plotSynopsis"])
+                        form.get("film", ""),
+                        form.get("filmURL", ""),
+                        host_name,
+                        (config["hosts"][hostIndex]['image'] if (not use_manual and config['hosts']) else ''),
+                        location_name,
+                        (config["locations"][locationIndex]['link'] if (not use_manual and config['locations']) else ''),
+                        form.get("wearing", ""),
+                        form.get("showTime", ""),
+                        form.get("plotSynopsis", ""))
 
         # If manual HTML override was provided, use it
-        use_manual = str(form.get('useManualHTML', '')).lower() in ('1', 'true', 'yes', 'on')
         override_html = form.get('overrideHTML')
         if use_manual and override_html:
             nl.override_html = override_html

@@ -48,11 +48,12 @@
                     <fieldset id="filmInfoSet">
                         <legend>Film Information</legend>
                         <label for="filmSearch">Film Title:</label>
-                        <input type="text" id="filmSearch" name="film" autocomplete="off" />
+                        <input type="text" id="filmSearch" name="film" autocomplete="off" required />
                         <div id="searchResults" style="display: none;"></div>
 
                         <label for="filmURL">Film URL:</label>
-                        <input type="text" name="filmURL" id="filmURL" />
+                        <input type="url" name="filmURL" id="filmURL" inputmode="url" pattern="https?://.+"
+                            title="Enter a valid http(s) URL" required />
 
                         <label for="showTime">Showtime:</label>
                         <input type="text" name="showTime" id="showTime" required />

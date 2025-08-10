@@ -50,6 +50,7 @@ select {
 }
 
 input[type="text"],
+input[type="url"],
 textarea {
     width: 100%;
     padding: 8px;
@@ -194,6 +195,12 @@ div#buttonsDiv {
 #targetsSet {
     display: flex;
     flex-direction: column;
+}
+
+/* Ensure labels stack above inputs consistently */
+fieldset label {
+    display: block;
+    margin: 8px 0 4px;
 }
 
 /* Preview styles */
