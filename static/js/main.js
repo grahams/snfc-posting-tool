@@ -190,6 +190,7 @@ $(document).ready(function () {
 	// Handle form reset
 	$("#postingForm").on('reset', function () {
 		clearStatusIndicators();
+		refreshPreview();
 	});
 
 	// Helper function to clear all status indicators
@@ -199,4 +200,147 @@ $(document).ready(function () {
 			.removeClass('status-success status-error')
 			.removeAttr('title');
 	}
+
+	// Live preview
+	const $form = $("#postingForm");
+	const $previewFrame = $("#previewFrame");
+	const $previewStatus = $("#previewStatus");
+	const $useManualHTML = $("#useManualHTML");
+	const $overrideHTML = $("#overrideHTML");
+	const $rtToolbar = $("#rtToolbar");
+
+	function setPreviewContent(html) {
+		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
+		doc.open();
+		doc.write(html || '<p style="font-family: sans-serif; color: #777;">No content</p>');
+		doc.close();
+
+		// If manual editing is enabled, update the hidden field with current HTML so user starts from generated content
+		if ($useManualHTML.is(":checked")) {
+			try {
+				$overrideHTML.val(doc.documentElement.outerHTML);
+			} catch (_) { }
+		}
+	}
+
+	function setPreviewError(message) {
+		setPreviewContent(`<div style="font-family: sans-serif; color: #b00020; padding: 12px;">${$('<div>').text(message).html()}</div>`);
+	}
+
+	let previewTimeout;
+	function refreshPreview() {
+		clearTimeout(previewTimeout);
+		previewTimeout = setTimeout(() => {
+			$previewStatus.text('Rendering…');
+			const payload = {
+				hostSelect: $("#hostSelect").val() || '',
+				locationSelect: $("#locationSelect").val() || '',
+				film: $("#filmSearch").val() || '',
+				filmURL: $("#filmURL").val() || '',
+				wearing: $("#wearing").val() || '',
+				showTime: $("#showTime").val() || '',
+				plotSynopsis: $("#synopsisArea").val() || '',
+				useManualHTML: $useManualHTML.is(":checked"),
+				overrideHTML: $overrideHTML.val() || ''
+			};
+
+			$.ajax({
+				url: '/api/preview',
+				method: 'POST',
+				contentType: 'application/json',
+				data: JSON.stringify(payload),
+				success: function (resp) {
+					if (resp && !resp.error) {
+						setPreviewContent(resp.html);
+						$previewStatus.text('');
+					} else {
+						setPreviewError(resp && resp.error ? resp.error : 'Unknown error');
+						$previewStatus.text('');
+					}
+				},
+				error: function () {
+					setPreviewError('Failed to render preview');
+					$previewStatus.text('');
+				}
+			});
+		}, 250);
+	}
+
+	// Trigger preview on field changes
+	$(document).on('input change', '#hostSelect, #locationSelect, #filmSearch, #filmURL, #wearing, #showTime, #synopsisArea, #useManualHTML', refreshPreview);
+
+	// Manual HTML editing: make iframe body contentEditable when enabled
+	$useManualHTML.on('change', function () {
+		const enabled = $(this).is(":checked");
+		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
+		if (doc) {
+			if (enabled) {
+				doc.designMode = 'on';
+				// Initialize hidden field with full HTML
+				$overrideHTML.val(doc.documentElement.outerHTML);
+			} else {
+				doc.designMode = 'off';
+				$overrideHTML.val('');
+			}
+		}
+
+		// Enable/disable toolbar
+		$rtToolbar.find('button, select').prop('disabled', !enabled);
+	});
+
+	// Listen for edits in the iframe and sync to hidden field
+	$("#previewFrame").on('load', function () {
+		const doc = this.contentDocument || this.contentWindow.document;
+		if (!doc) return;
+		if ($useManualHTML.is(":checked")) {
+			doc.designMode = 'on';
+		}
+		// Debounced sync
+		let syncTimeout;
+		const sync = () => {
+			clearTimeout(syncTimeout);
+			syncTimeout = setTimeout(() => {
+				try { $overrideHTML.val(doc.documentElement.outerHTML); } catch (_) { }
+			}, 150);
+		};
+		doc.addEventListener('input', sync, true);
+		doc.addEventListener('keyup', sync, true);
+		doc.addEventListener('change', sync, true);
+	});
+
+	// Toolbar actions
+	$rtToolbar.on('click', '.rt-btn[data-cmd]', function () {
+		if ($useManualHTML.is(':checked') === false) return;
+		const cmd = $(this).data('cmd');
+		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
+		if (!doc) return;
+		if (cmd === 'createLink') {
+			const url = prompt('Enter URL', 'https://');
+			if (!url) return;
+			doc.execCommand('createLink', false, url);
+		} else if (cmd === 'removeFormat') {
+			// Also remove any links in the selection
+			doc.execCommand('unlink', false, null);
+			doc.execCommand('removeFormat', false, null);
+		} else {
+			doc.execCommand(cmd, false, null);
+		}
+		// sync after command
+		try { $overrideHTML.val(doc.documentElement.outerHTML); } catch (_) { }
+	});
+
+	$rtToolbar.on('click', '.rt-btn[data-action="clearManual"]', function () {
+		if (!$useManualHTML.is(':checked')) return;
+		$overrideHTML.val('');
+		$useManualHTML.prop('checked', false).trigger('change');
+		refreshPreview();
+	});
+
+	// Also refresh after OMDB autofill
+	$(document).on('click', '.movie-result', function () {
+		setTimeout(refreshPreview, 0);
+	});
+
+	// Initial preview on load
+	refreshPreview();
 });

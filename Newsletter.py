@@ -22,6 +22,7 @@ class Newsletter:
     synopsis = ""
     wearing = ""
     daySuffix = "th"
+    override_html = None
 
     def __init__(self, city, clubURL, film, filmURL,
                  host, hostURL, 
@@ -40,6 +41,8 @@ class Newsletter:
         self.showTime = self.normalize_time(showTime)
         self.synopsis = synopsis.strip()
         self.daySuffix = self.get_date_suffix(self.get_next_sunday().day)
+        # Optional manual override of generated HTML
+        self.override_html = None
 
     def get_next_sunday(self):
         # determine whatever the next sunday is
@@ -60,6 +63,9 @@ class Newsletter:
         """
         # Remove any extra whitespace
         time_str = time_str.strip().lower()
+        # Allow empty during preview (no error)
+        if time_str == "":
+            return ""
         print(f"Processing time string: '{time_str}'")
         
         # Handle times without separators (e.g. 400, 220)
@@ -118,6 +124,10 @@ class Newsletter:
         return subject
 
     def generate_HTML(self):
+        # If an override is provided, return it directly
+        if getattr(self, 'override_html', None):
+            return self.override_html
+
         env = Environment(loader=FileSystemLoader('templates/'))
         template = env.get_template('htmlnewsletter.html')
 

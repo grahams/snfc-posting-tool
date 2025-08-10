@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link media="all" href="static/tool.css" type="text/css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css">
     <title>Boston SNFC Newsletter Tool</title>
     <script src="static/js/jquery-3.7.1.min.js" type="text/javascript"></script>
     <script src="static/js/main.js" type="text/javascript"></script>
@@ -83,6 +84,42 @@
                         <input type="reset" value="Clear Form" />
                     </fieldset>
                 </div>
+            </div>
+            <div id="previewColumnDiv">
+                <fieldset id="previewFieldset">
+                    <legend>Live Newsletter Preview</legend>
+                    <div id="previewToolbar">
+                        <label class="checkbox-label" style="margin: 0;">
+                            <input type="checkbox" id="useManualHTML" name="useManualHTML" />
+                            Enable manual editing
+                        </label>
+                        <input type="hidden" id="overrideHTML" name="overrideHTML" value="" />
+                        <div id="rtToolbar" aria-label="Formatting toolbar" role="toolbar">
+                            <button type="button" class="rt-btn" data-cmd="bold" title="Bold" disabled><b>B</b></button>
+                            <button type="button" class="rt-btn" data-cmd="italic" title="Italic"
+                                disabled><i>I</i></button>
+                            <button type="button" class="rt-btn" data-cmd="underline" title="Underline"
+                                disabled><u>U</u></button>
+                            <span class="rt-sep"></span>
+                            <button type="button" class="rt-btn" data-cmd="createLink" title="Insert link" disabled>
+                                <i class="fas fa-link" aria-hidden="true"></i>
+                                <span class="sr-only">Link</span>
+                            </button>
+                            <button type="button" class="rt-btn" data-cmd="removeFormat" title="Clear formatting"
+                                disabled>
+                                <i class="fas fa-eraser" aria-hidden="true"></i>
+                                <span class="sr-only">Clear formatting</span>
+                            </button>
+                            <span class="rt-sep"></span>
+                            <button type="button" class="rt-btn" data-action="clearManual" title="Reset manual edits"
+                                disabled>Reset</button>
+                        </div>
+                        <span id="previewStatus"></span>
+                    </div>
+                    <div id="previewContainer">
+                        <iframe id="previewFrame" title="Newsletter Preview"></iframe>
+                    </div>
+                </fieldset>
             </div>
         </form>
     </div>
