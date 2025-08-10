@@ -26,7 +26,7 @@
                             {% endfor %}
                         </select>
 
-                        <label for="wearing">Wearing:</label>
+                        <label for="wearing">Wearing (optional):</label>
                         <input type="text" name="wearing" id="wearing" value="a nametag" />
                     </fieldset>
                 </div>
@@ -90,6 +90,11 @@
                 <fieldset id="previewFieldset">
                     <legend>Live Newsletter Preview</legend>
                     <div id="previewToolbar">
+                        <div id="subjectRow">
+                            <label for="overrideSubject">Subject:</label>
+                            <input type="text" id="overrideSubject" name="overrideSubject"
+                                placeholder="Newsletter subject" />
+                        </div>
                         <label class="checkbox-label" style="margin: 0;">
                             <input type="checkbox" id="useManualHTML" name="useManualHTML" />
                             Enable manual editing

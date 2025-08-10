@@ -52,6 +52,7 @@ def preview_newsletter():
         wearing = data.get('wearing', '')
         showTime = data.get('showTime', '')
         synopsis = data.get('plotSynopsis', '')
+        override_subject = data.get('overrideSubject')
 
         # Resolve host and location URLs from config
         host_url = ''
@@ -80,14 +81,17 @@ def preview_newsletter():
             synopsis,
         )
 
-        # Apply manual override if provided
+        # Apply manual overrides if provided
         use_manual = str(data.get('useManualHTML', '')).lower() in ('1', 'true', 'yes', 'on')
         override_html = data.get('overrideHTML')
         if use_manual and override_html:
             nl.override_html = override_html
+        if use_manual and override_subject is not None:
+            nl.override_subject = override_subject
 
         html = nl.generate_HTML()
-        return jsonify({ 'html': html, 'error': None })
+        subject = nl.generate_subject()
+        return jsonify({ 'html': html, 'subject': subject, 'error': None })
     except Exception as e:
         # Return error but 200 so the client can display it inline
         return jsonify({ 'html': '', 'error': str(e) })
@@ -159,8 +163,11 @@ def index():
 
         # If manual HTML override was provided, use it
         override_html = form.get('overrideHTML')
+        override_subject = form.get('overrideSubject')
         if use_manual and override_html:
             nl.override_html = override_html
+        if use_manual and override_subject is not None:
+            nl.override_subject = override_subject
 
         load_plugins()
 

@@ -1,4 +1,5 @@
 from jinja2 import Environment, FileSystemLoader
+from typing import Optional
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import re
@@ -22,7 +23,8 @@ class Newsletter:
     synopsis = ""
     wearing = ""
     daySuffix = "th"
-    override_html = None
+    override_html: Optional[str] = None
+    override_subject: Optional[str] = None
 
     def __init__(self, city, clubURL, film, filmURL,
                  host, hostURL, 
@@ -43,6 +45,8 @@ class Newsletter:
         self.daySuffix = self.get_date_suffix(self.get_next_sunday().day)
         # Optional manual override of generated HTML
         self.override_html = None
+        # Optional manual override of generated subject
+        self.override_subject = None
 
     def get_next_sunday(self):
         # determine whatever the next sunday is
@@ -118,14 +122,15 @@ class Newsletter:
         
         raise ValueError(f"Invalid time format: {time_str}")
 
-    def generate_subject(self):
+    def generate_subject(self) -> str:
+        if self.override_subject is not None:
+            return self.override_subject
         subject = f'"{self.film}" - {self.get_next_sunday().strftime("%b %d")}{self.daySuffix}'
-
         return subject
 
-    def generate_HTML(self):
+    def generate_HTML(self) -> str:
         # If an override is provided, return it directly
-        if getattr(self, 'override_html', None):
+        if self.override_html is not None:
             return self.override_html
 
         env = Environment(loader=FileSystemLoader('templates/'))
@@ -169,7 +174,7 @@ class Newsletter:
                 "beautifulsoup4 is required for plain text generation. Install with 'pip install beautifulsoup4'."
             ) from exc
 
-        html_content = self.generate_HTML()
+        html_content: str = self.generate_HTML() or ""
         soup = BeautifulSoup(html_content, "html.parser")
 
         # Remove any scripts/styles if present

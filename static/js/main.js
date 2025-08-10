@@ -220,6 +220,7 @@ $(document).ready(function () {
 	const $useManualHTML = $("#useManualHTML");
 	const $overrideHTML = $("#overrideHTML");
 	const $rtToolbar = $("#rtToolbar");
+	const $overrideSubject = $("#overrideSubject");
 
 	function setPreviewContent(html) {
 		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
@@ -258,7 +259,8 @@ $(document).ready(function () {
 				showTime: $("#showTime").val() || '',
 				plotSynopsis: $("#synopsisArea").val() || '',
 				useManualHTML: $useManualHTML.is(":checked"),
-				overrideHTML: $overrideHTML.val() || ''
+				overrideHTML: $overrideHTML.val() || '',
+				overrideSubject: $overrideSubject.val() || null
 			};
 
 			$.ajax({
@@ -269,6 +271,9 @@ $(document).ready(function () {
 				success: function (resp) {
 					if (resp && !resp.error) {
 						setPreviewContent(resp.html);
+						if (resp.subject && !$useManualHTML.is(':checked')) {
+							$overrideSubject.val(resp.subject);
+						}
 						$previewStatus.text('');
 					} else {
 						setPreviewError(resp && resp.error ? resp.error : 'Unknown error');
@@ -284,7 +289,7 @@ $(document).ready(function () {
 	}
 
 	// Trigger preview on field changes
-	$(document).on('input change', '#hostSelect, #locationSelect, #filmSearch, #filmURL, #wearing, #showTime, #synopsisArea, #useManualHTML', refreshPreview);
+	$(document).on('input change', '#hostSelect, #locationSelect, #filmSearch, #filmURL, #wearing, #showTime, #synopsisArea, #useManualHTML, #overrideSubject', refreshPreview);
 
 	// Manual HTML editing: make iframe body contentEditable when enabled
 	$useManualHTML.on('change', function () {
