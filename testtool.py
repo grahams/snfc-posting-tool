@@ -6,7 +6,7 @@ import json
 import os
 import sys
 import traceback
-from typing import Dict, List
+from typing import Dict, List, Optional
 from BasePostingAction import BasePostingAction
 
 from Newsletter import Newsletter
@@ -27,7 +27,6 @@ def find_default_config_path() -> str:
     # 1) Explicit env override
     env_path = os.getenv("SNFC_CONFIG")
     if env_path and os.path.isfile(env_path):
-    if env_path:
         abs_env_path = os.path.abspath(env_path)
         # Only allow config files within the script directory
         if os.path.commonpath([abs_env_path, SCRIPT_PATH]) == SCRIPT_PATH and os.path.isfile(abs_env_path):
