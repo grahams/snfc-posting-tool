@@ -26,18 +26,33 @@ def load_plugins():
 
     pluginNames = glob.glob(os.path.join(pluginPath, "*.py"))
     
-    for x in pluginNames: 
+    for x in pluginNames:
         pathName = x.replace(".py","")
         className = os.path.basename(pathName)
+        try:
+            # import the module
+            mod = __import__(className)
 
-        # import the module
-        mod = __import__(className)
+            # find the symbol for the class
+            cls = getattr(mod, className)
 
-        # find the symbol for the class
-        cls  = getattr(mod, className)
+            # instantiate
+            instance = cls()
 
-        # add the plugin to the list
-        pluginList[ cls().pluginName ] = cls()
+            # determine plugin key name safely
+            name = getattr(instance, 'pluginName', None) or getattr(cls, 'pluginName', None) or className
+
+            # add the plugin to the list
+            pluginList[name] = instance
+        except Exception:
+            print(f"Failed to load plugin '{className}':\n{traceback.format_exc()}")
+
+def is_plugin_enabled(config_obj, plugin_obj):
+    try:
+        section = config_obj.get(getattr(plugin_obj, 'configSection', ''), {})
+        return bool(section.get('enabled', True))
+    except Exception:
+        return True
 
 @app.route('/api/preview', methods=['POST'])
 def preview_newsletter():
@@ -171,7 +186,7 @@ def index():
 
         load_plugins()
 
-        selected_plugins = form.getlist("plugins")
+        selected_plugins = [p for p in form.getlist("plugins") if is_plugin_enabled(config, pluginList.get(p))]
         results = []
 
         for plugin_name in selected_plugins:
@@ -197,7 +212,8 @@ def index():
 
     else:
         load_plugins()
-        plugNames = [item for item in pluginList]
+        # Only show enabled plugins in the UI
+        plugNames = [name for name, pobj in pluginList.items() if is_plugin_enabled(config, pobj)]
         return render_template('form.html', pluginList=plugNames, hostsDict=config['hosts'], locationDict=config['locations'])
 
 def extract_url(text):

@@ -7,6 +7,7 @@ import os
 import sys
 import traceback
 from typing import Dict, List
+from BasePostingAction import BasePostingAction
 
 from Newsletter import Newsletter
 
@@ -44,12 +45,12 @@ def find_default_config_path() -> str:
     )
 
 
-def load_plugins() -> Dict[str, object]:
+def load_plugins() -> Dict[str, BasePostingAction]:
     """Dynamically import plugin classes and return a map of pluginName -> instance."""
     sys.path.append(SCRIPT_PATH)
     sys.path.append(PLUGINS_PATH)
 
-    plugin_instances: Dict[str, object] = {}
+    plugin_instances: Dict[str, BasePostingAction] = {}
     plugin_files: List[str] = glob.glob(os.path.join(PLUGINS_PATH, "*.py"))
 
     for file_path in plugin_files:
@@ -60,11 +61,22 @@ def load_plugins() -> Dict[str, object]:
             mod = __import__(module_name)
             cls = getattr(mod, module_name)
             instance = cls()
-            plugin_instances[instance.pluginName] = instance
+            name = getattr(instance, 'pluginName', None) or getattr(cls, 'pluginName', None) or module_name
+            plugin_instances[name] = instance
         except Exception:
             print(f"Failed to load plugin module '{module_name}':\n{traceback.format_exc()}")
 
     return plugin_instances
+
+
+def is_plugin_enabled(config: Dict, plugin_obj: BasePostingAction) -> bool:
+    """Check configSection.enabled for a plugin, defaulting to True if missing."""
+    try:
+        section_name = getattr(plugin_obj, 'configSection', '')
+        section = config.get(section_name, {}) if section_name else {}
+        return bool(section.get('enabled', True))
+    except Exception:
+        return True
 
 
 def resolve_host_url(config: Dict, host_name: str) -> str:
@@ -79,11 +91,6 @@ def resolve_location_url(config: Dict, location_name: str) -> str:
         if loc.get("name") == location_name:
             return loc.get("link", "")
     return ""
-
-
-def pick_default(value: str, fallback: str) -> str:
-    return value if value else fallback
-
 
 def main(argv: List[str]) -> int:
     parser = argparse.ArgumentParser(
@@ -108,9 +115,12 @@ def main(argv: List[str]) -> int:
     config_path = args.config or find_default_config_path()
     config = load_config(config_path)
 
-    # Choose host/location (use first in config if not provided)
-    host_name = args.host or (config.get("hosts", [{}])[0].get("name", "") if config.get("hosts") else "")
-    location_name = args.location or (config.get("locations", [{}])[0].get("name", "") if config.get("locations") else "")
+    # Choose host/location (use first in config if not provided), guarding for empty lists
+    hosts_list = config.get("hosts") or []
+    locations_list = config.get("locations") or []
+
+    host_name = args.host or (hosts_list[0].get("name", "") if hosts_list else "")
+    location_name = args.location or (locations_list[0].get("name", "") if locations_list else "")
 
     host_url = resolve_host_url(config, host_name)
     location_url = resolve_location_url(config, location_name)
@@ -137,16 +147,21 @@ def main(argv: List[str]) -> int:
         print("No plugins discovered under 'plugins/'. Nothing to do.")
         return 1
 
-    selected_plugin_names = args.plugin or list(plugins.keys())
+    # Default to enabled plugins if none explicitly requested
+    enabled_plugins: Dict[str, BasePostingAction] = { name: pobj for name, pobj in plugins.items() if is_plugin_enabled(config, pobj) }
+    selected_plugin_names = args.plugin or list(enabled_plugins.keys())
 
     print(f"Running plugins: {', '.join(selected_plugin_names)}\n")
 
     exit_code = 0
     for plugin_name in selected_plugin_names:
-        plugin = plugins.get(plugin_name)
+        plugin: BasePostingAction = plugins.get(plugin_name)  # type: ignore[assignment]
         if not plugin:
             print(f"[SKIP] Plugin not found: {plugin_name}")
             exit_code = 2
+            continue
+        if not is_plugin_enabled(config, plugin):
+            print(f"[SKIP] Plugin disabled in config: {plugin_name}")
             continue
         try:
             result = plugin.execute(config, nl)
