@@ -3,3 +3,17 @@ weekly newsletter to multiple services (email, livejournal, wordpress,
 twitter, etc). 
 
 (c)2010-2025 Sean Graham (sean-graham.com)
+
+Local testing
+-------------
+
+- Copy `config.example.json` to `config.json` and adjust values for your environment.
+- Run the web app: `python app.py` then open the form.
+- Or run the CLI test tool to invoke plugins directly:
+
+```
+python testtool.py --help
+python testtool.py --plugin "SNFC Mailing List" --film "Example" --time 7:30pm
+```
+
+You can specify a config path via `--config` or `SNFC_CONFIG` env variable.
