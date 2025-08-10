@@ -1,0 +1,45 @@
+{
+  "clubCity": "Boston",
+  "clubURL": "https://boston.sundaynightfilmclub.com/",
+  "hosts": [
+    {
+      "name": "Sean",
+      "image": "https://example.com/hosts/sean.jpg"
+    },
+    {
+      "name": "Alex",
+      "image": "https://example.com/hosts/alex.jpg"
+    }
+  ],
+  "locations": [
+    {
+      "name": "Example Cinema",
+      "link": "https://example.com/cinemas/example"
+    }
+  ],
+  "omdb": {
+    "apiKey": "YOUR_OMDB_API_KEY"
+  },
+  "mailingList": {
+    "enabled": true,
+    "sender": "host@example.com",
+    "recipient": "announce@example.com",
+    "url": "https://lists.example.com/listinfo/snfc",
+    "smtpUsername": "",
+    "smtpPassword": "",
+    "smtpHostname": "localhost",
+    "smtpPort": 1025,
+    "smtpUseSSL": false,
+    "smtpUseStartTLS": false
+  },
+  "hugo": {
+    "enabled": false,
+    "gitRepoDir": "/path/to/your/hugo/site",
+    "contentDir": "content/posts",
+    "sshKeyPath": ""
+  },
+  "googleCalendar": {
+    "enabled": false,
+    "calendarId": "your_calendar_id@group.calendar.google.com"
+  }
+}
