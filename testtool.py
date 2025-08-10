@@ -159,7 +159,7 @@ def main(argv: List[str]) -> int:
 
     exit_code = 0
     for plugin_name in selected_plugin_names:
-        plugin: BasePostingAction = plugins.get(plugin_name)  # type: ignore[assignment]
+        plugin: Optional[BasePostingAction] = plugins.get(plugin_name)
         if not plugin:
             print(f"[SKIP] Plugin not found: {plugin_name}")
             exit_code = 2
