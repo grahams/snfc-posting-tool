@@ -25,16 +25,30 @@ class HugoPostingAction(BasePostingAction):
         # Generate the post filename using the date and film title
         date = nl.get_next_sunday()
         # Strip all punctuation and symbols except hyphens, convert to lowercase, and replace spaces with hyphens
-        clean_title = re.sub(r'[^\w\s-]', '', nl.film.lower())
+        if nl.override_subject:
+            clean_title = re.sub(r'[^\w\s-]', '', nl.override_subject.lower())
+        elif nl.film:
+            clean_title = re.sub(r'[^\w\s-]', '', nl.film.lower())
         clean_title = re.sub(r'[-\s]+', '-', clean_title)
         filename = f"{date.strftime('%Y-%m-%d')}-{clean_title}.md"
         
         # Create the full path in the git repo
         git_filepath = os.path.join(git_repo_dir, content_dir, filename)
 
+        # Ensure we do not overwrite an existing file by adjusting the filename if needed
+        base_name, ext = os.path.splitext(filename)
+        candidate_filename = filename
+        suffix_counter = 1
+        while os.path.exists(os.path.join(git_repo_dir, content_dir, candidate_filename)):
+            candidate_filename = f"{base_name}-{suffix_counter}{ext}"
+            suffix_counter += 1
+        filename = candidate_filename
+        git_filepath = os.path.join(git_repo_dir, content_dir, filename)
+
         # Generate the front matter
         front_matter = f"""---
-title: '{nl.generate_subject()}'
+title: >
+    {nl.generate_subject()}
 date: "{datetime.now().strftime('%Y-%m-%dT%H:%M:%S-00:00')}"
 draft: false
 tags: ["newsletter"]
