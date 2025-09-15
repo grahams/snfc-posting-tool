@@ -41,5 +41,12 @@
   "googleCalendar": {
     "enabled": false,
     "calendarId": "your_calendar_id@group.calendar.google.com"
+  },
+  "mastodon": {
+    "enabled": false,
+    "instanceUrl": "https://mastodon.social",
+    "accessToken": "YOUR_MASTODON_ACCESS_TOKEN",
+    "visibility": "public",
+    "language": "en"
   }
 }
