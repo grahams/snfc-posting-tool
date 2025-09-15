@@ -221,6 +221,7 @@ $(document).ready(function () {
 	const $overrideHTML = $("#overrideHTML");
 	const $rtToolbar = $("#rtToolbar");
 	const $overrideSubject = $("#overrideSubject");
+	const $characterCount = $("#characterCount");
 
 	function setPreviewContent(html) {
 		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
@@ -243,6 +244,22 @@ $(document).ready(function () {
 
 	function setPreviewError(message) {
 		setPreviewContent(`<div style="font-family: sans-serif; color: #b00020; padding: 12px;">${$('<div>').text(message).html()}</div>`);
+	}
+
+	function updateCharacterCount() {
+		if (!$useManualHTML.is(":checked")) {
+			$characterCount.hide();
+			return;
+		}
+
+		const doc = $previewFrame[0].contentDocument || $previewFrame[0].contentWindow.document;
+		if (!doc) return;
+
+		// Get the text content from the iframe body, excluding HTML tags
+		const textContent = doc.body ? doc.body.innerText || doc.body.textContent || '' : '';
+		const charCount = textContent.length;
+
+		$characterCount.text(`${charCount} characters`).show();
 	}
 
 	let previewTimeout;
@@ -309,6 +326,13 @@ $(document).ready(function () {
 		// Enable/disable toolbar
 		$rtToolbar.find('button, select').prop('disabled', !enabled);
 
+		// Show/hide character count
+		if (enabled) {
+			updateCharacterCount();
+		} else {
+			$characterCount.hide();
+		}
+
 		// Disable native form validation when manual editing is enabled
 		const $formEl = $("#postingForm");
 		if (enabled) {
@@ -331,6 +355,7 @@ $(document).ready(function () {
 			clearTimeout(syncTimeout);
 			syncTimeout = setTimeout(() => {
 				try { $overrideHTML.val(doc.documentElement.outerHTML); } catch (_) { }
+				updateCharacterCount();
 			}, 150);
 		};
 		doc.addEventListener('input', sync, true);
@@ -357,12 +382,14 @@ $(document).ready(function () {
 		}
 		// sync after command
 		try { $overrideHTML.val(doc.documentElement.outerHTML); } catch (_) { }
+		updateCharacterCount();
 	});
 
 	$rtToolbar.on('click', '.rt-btn[data-action="clearManual"]', function () {
 		if (!$useManualHTML.is(':checked')) return;
 		$overrideHTML.val('');
 		$useManualHTML.prop('checked', false).trigger('change');
+		$characterCount.hide();
 		refreshPreview();
 	});
 
