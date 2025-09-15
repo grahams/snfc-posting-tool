@@ -48,5 +48,11 @@
     "accessToken": "YOUR_MASTODON_ACCESS_TOKEN",
     "visibility": "public",
     "language": "en"
+  },
+  "bluesky": {
+    "enabled": false,
+    "service": "https://bsky.social",
+    "handle": "you.example.bsky.social",
+    "appPassword": "YOUR_BSKY_APP_PASSWORD"
   }
 }
