@@ -9,9 +9,11 @@ class MastodonPostingAction(BasePostingAction):
     config = None
 
     def _build_status(self, nl) -> str:
-        base_text = nl.generate_twitter()
+        # Use the generic short-form generator
+        base_text = nl.generate_short_text() if hasattr(nl, 'generate_short_text') else nl.generate_twitter()
         link = nl.filmURL or nl.clubURL
-        if link:
+
+        if not nl.override_html:
             status = f"{base_text} {link}"
         else:
             status = base_text

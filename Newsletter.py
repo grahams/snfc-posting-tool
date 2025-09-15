@@ -159,10 +159,17 @@ class Newsletter:
 
         return rendered_template
 
-    def generate_twitter(self):
-        resultText = f'"{self.film}" @ {self.location}. {self.get_next_sunday().strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
+    def generate_short_text(self):
+        # If manual HTML editing is enabled, derive short text from the plain text of the HTML
+        if self.override_html is not None:
+            return self.generate_plain_text()
 
+        resultText = f'"{self.film}" @ {self.location}. {self.get_next_sunday().strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
         return resultText
+
+    # Backward-compatibility alias (deprecated)
+    def generate_twitter(self):
+        return self.generate_short_text()
 
     def generate_plain_text(self):
         # Generate plain text by converting the rendered HTML to text
