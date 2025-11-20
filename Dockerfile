@@ -8,4 +8,16 @@ RUN apt-get update && apt-get install -y hugo
 ADD . /project
 WORKDIR /project
 RUN pip install -r requirements.txt
+
+# Set user and group
+ARG user=appuser
+ARG group=appuser
+ARG uid=1000
+ARG gid=1000
+RUN groupadd -g ${gid} ${group}
+RUN useradd -u ${uid} -g ${group} -s /bin/sh -m ${user} # <--- the '-m' create a user home directory
+
+# Switch to user
+USER ${uid}:${gid}
+
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "app:app"]
