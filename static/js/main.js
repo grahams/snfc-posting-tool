@@ -127,9 +127,20 @@ $(document).ready(function () {
 	});
 
 	// Form submission handling
+	const $submitButton = $('input[type="submit"]');
+	let originalSubmitValue = $submitButton.val();
+
 	$("#postingForm").on('submit', function (e) {
 		e.preventDefault();
 		console.log('Form submitted');
+
+		// Prevent multiple submissions - check if already submitting
+		if ($submitButton.prop('disabled')) {
+			return;
+		}
+
+		// Disable submit button and show loading state
+		$submitButton.prop('disabled', true).val('Submitting...').addClass('submitting');
 
 		// Clear any existing status indicators
 		clearStatusIndicators();
@@ -149,6 +160,8 @@ $(document).ready(function () {
 			const urlOk = /^https?:\/\/.+/.test(filmUrl);
 			if (!filmTitle || !filmUrl || !urlOk) {
 				alert('Please enter a Film Title and a valid Film URL (starting with http(s)://).');
+				// Re-enable button if validation fails
+				$submitButton.prop('disabled', false).val(originalSubmitValue).removeClass('submitting');
 				return;
 			}
 		}
@@ -187,6 +200,9 @@ $(document).ready(function () {
 						console.log('Could not find status indicator for:', result.plugin);
 					}
 				});
+
+				// Re-enable submit button after successful submission
+				$submitButton.prop('disabled', false).val(originalSubmitValue).removeClass('submitting');
 			},
 			error: function (xhr, status, error) {
 				console.log('Error submitting form:', error);
@@ -195,6 +211,9 @@ $(document).ready(function () {
 					const statusIndicator = $(`.checkbox-label:contains('${plugin}') .status-indicator`);
 					statusIndicator.html('✗').addClass('status-error');
 				});
+
+				// Re-enable submit button after error
+				$submitButton.prop('disabled', false).val(originalSubmitValue).removeClass('submitting');
 			}
 		});
 	});

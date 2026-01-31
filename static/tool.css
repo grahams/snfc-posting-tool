@@ -90,6 +90,13 @@ input[type="reset"]:hover {
     opacity: 0.9;
 }
 
+input[type="submit"]:disabled,
+input[type="submit"].submitting {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #81C784;
+}
+
 #searchResults {
     position: absolute;
     background: white;
