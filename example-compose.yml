@@ -20,6 +20,7 @@ services:
             - '/opt/docker/data/tool.sundaynightfilmclub.com/boston/token.json:/project/token.json'
         networks:
             - proxy
+            - moviething
 
     dc-posting-tool:
         container_name: dc-posting-tool
@@ -42,7 +43,10 @@ services:
             - '/opt/docker/data/tool.sundaynightfilmclub.com/dc/token.json:/project/token.json'
         networks:
             - proxy
+            - moviething
 
 networks:
     proxy:
+        external: true
+    moviething:
         external: true
