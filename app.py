@@ -177,6 +177,11 @@ def movie_details():
     if not tmdb_id:
         return jsonify({'error': 'TMDB ID is required'}), 400
 
+    try:
+        tmdb_id = int(tmdb_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid TMDB ID'}), 400
+
     base_url = config.get('moviething', {}).get('baseUrl', '')
     if not base_url:
         return jsonify({'error': 'moviething not configured'}), 500
@@ -189,7 +194,7 @@ def movie_details():
     try:
         resp = requests.post(
             f'{base_url}/getMovieDetails',
-            data={'json': json.dumps({'tmdbID': int(tmdb_id)})},
+            data={'json': json.dumps({'tmdbID': tmdb_id})},
             headers=headers,
             timeout=10,
         )
