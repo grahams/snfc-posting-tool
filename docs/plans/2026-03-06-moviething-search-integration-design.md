@@ -40,7 +40,7 @@ Add `moviething.baseUrl` to config.json (e.g., `http://moviething:3000/api`).
 - `GET /api/movie/details?id=<tmdbID>`
   - POSTs to `moviething/api/getMovieDetails` with `{tmdbID}`
   - Forwards `x-authentik-username` header
-  - Translates response to `{Title, imdbID, Plot, Response: "True"}`
+  - Translates response to `{Title, tmdbID, Plot, Response: "True"}`
 
 ### Removed endpoints
 
@@ -58,7 +58,7 @@ Add `moviething.baseUrl` to config.json (e.g., `http://moviething:3000/api`).
 - Update AJAX calls from `/api/omdb/search` to `/api/movie/search`
 - Update movie selection from `/api/omdb/movie` to `/api/movie/details`
 - Use `tmdbID` instead of `imdbID` as the result identifier
-- On selection, still populate: film title, `https://www.imdb.com/title/<imdbID>/`, plot
+- On selection, populate: film title, `https://www.themoviedb.org/movie/<tmdbID>`, plot
 
 ### Filter UI
 
@@ -116,5 +116,5 @@ Add:
 5. User clicks a result
 6. JS sends GET to `/api/movie/details?id=<tmdbID>`
 7. Flask proxy POSTs to `moviething:3000/api/getMovieDetails`, forwards Authentik header
-8. Response translated to `{Title, imdbID, Plot}`
-9. Form fields populated: film title, IMDB URL, plot synopsis
+8. Response translated to `{Title, tmdbID, Plot}`
+9. Form fields populated: film title, TMDB URL, plot synopsis

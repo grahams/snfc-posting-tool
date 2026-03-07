@@ -80,7 +80,7 @@ $(document).ready(function () {
 				},
 				error: function () {
 					$("#searchResults")
-						.html('<div class="movie-result">Search unavailable</div>')
+						.html('<div class="search-error">Search unavailable</div>')
 						.show();
 				}
 			});
@@ -145,7 +145,7 @@ $(document).ready(function () {
 			},
 			error: function () {
 				$("#searchResults")
-					.html('<div class="movie-result">Could not load movie details</div>')
+					.html('<div class="search-error">Could not load movie details</div>')
 					.show();
 			}
 		});

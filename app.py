@@ -157,6 +157,7 @@ def movie_search():
             headers=headers,
             timeout=10,
         )
+        resp.raise_for_status()
         data = resp.json()
         results = []
         for movie in data.get('Search', []):
@@ -198,6 +199,7 @@ def movie_details():
             headers=headers,
             timeout=10,
         )
+        resp.raise_for_status()
         data = resp.json()
         return jsonify({
             'Title': data.get('Title', ''),
