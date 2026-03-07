@@ -137,7 +137,7 @@ $(document).ready(function () {
 			success: function (response) {
 				if (response.Response === "True") {
 					$("#filmSearch").val(response.Title);
-					$("#filmURL").val(`https://www.imdb.com/title/${response.imdbID}/`);
+					$("#filmURL").val(`https://www.themoviedb.org/movie/${response.tmdbID}`);
 					$("#synopsisArea").val(response.Plot);
 					$("#searchResults").hide();
 					selectedIndex = -1;

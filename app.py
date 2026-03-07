@@ -201,7 +201,7 @@ def movie_details():
         data = resp.json()
         return jsonify({
             'Title': data.get('Title', ''),
-            'imdbID': data.get('imdbID', ''),
+            'tmdbID': data.get('tmdbID', ''),
             'Plot': data.get('Plot', ''),
             'Response': 'True' if data.get('Title') else 'False',
         })
