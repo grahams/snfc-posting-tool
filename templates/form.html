@@ -50,6 +50,39 @@
                         <label for="filmSearch">Film Title:</label>
                         <input type="text" id="filmSearch" name="film" autocomplete="off" required />
                         <div id="searchResults" style="display: none;"></div>
+                        <details id="searchFilters">
+                            <summary>Search Filters</summary>
+                            <div class="filter-grid">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="excludeVideos" />
+                                    Exclude videos
+                                </label>
+                                <div class="filter-row">
+                                    <label for="minPopularity">Popularity:</label>
+                                    <input type="number" id="minPopularity" placeholder="Min" step="any" />
+                                    <span>to</span>
+                                    <input type="number" id="maxPopularity" placeholder="Max" step="any" />
+                                </div>
+                                <div class="filter-row">
+                                    <label for="minVoteCount">Vote count:</label>
+                                    <input type="number" id="minVoteCount" placeholder="Min" />
+                                    <span>to</span>
+                                    <input type="number" id="maxVoteCount" placeholder="Max" />
+                                </div>
+                                <div class="filter-row">
+                                    <label for="minVoteAverage">Rating:</label>
+                                    <input type="number" id="minVoteAverage" placeholder="Min" step="0.1" min="0" max="10" />
+                                    <span>to</span>
+                                    <input type="number" id="maxVoteAverage" placeholder="Max" step="0.1" min="0" max="10" />
+                                </div>
+                                <div class="filter-row">
+                                    <label for="minReleaseDate">Release date:</label>
+                                    <input type="date" id="minReleaseDate" />
+                                    <span>to</span>
+                                    <input type="date" id="maxReleaseDate" />
+                                </div>
+                            </div>
+                        </details>
 
                         <label for="filmURL">Film URL:</label>
                         <input type="url" name="filmURL" id="filmURL" inputmode="url" pattern="https?://.+"

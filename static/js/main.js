@@ -23,7 +23,7 @@ $(document).ready(function () {
 		$(this).val(s);
 	});
 
-	// OMDB Search functionality
+	// Movie search functionality
 	let searchTimeout;
 	let selectedIndex = -1;
 
@@ -35,15 +35,38 @@ $(document).ready(function () {
 		if (searchTerm.length < 2) return;
 
 		searchTimeout = setTimeout(() => {
+			const params = new URLSearchParams({ q: searchTerm });
+			const filterMap = {
+				'excludeVideos': 'exclude_videos',
+				'minPopularity': 'min_popularity',
+				'maxPopularity': 'max_popularity',
+				'minVoteCount': 'min_vote_count',
+				'maxVoteCount': 'max_vote_count',
+				'minVoteAverage': 'min_vote_average',
+				'maxVoteAverage': 'max_vote_average',
+				'minReleaseDate': 'min_release_date',
+				'maxReleaseDate': 'max_release_date',
+			};
+			for (const [elemId, paramName] of Object.entries(filterMap)) {
+				const $el = $(`#${elemId}`);
+				if ($el.length) {
+					if ($el.is(':checkbox')) {
+						if ($el.is(':checked')) params.set(paramName, 'true');
+					} else if ($el.val()) {
+						params.set(paramName, $el.val());
+					}
+				}
+			}
+
 			$.ajax({
-				url: `api/omdb/search?q=${encodeURIComponent(searchTerm)}`,
+				url: `api/movie/search?${params.toString()}`,
 				method: 'GET',
 				success: function (response) {
 					if (response.Response === "True") {
 						const results = response.Search
-							.sort((a, b) => parseInt(b.Year) - parseInt(a.Year)); // Sort by year descending
+							.sort((a, b) => parseInt(b.Year) - parseInt(a.Year));
 						const resultsHtml = results.map(movie => `
-							<div class="movie-result" data-imdbid="${movie.imdbID}" tabindex="-1">
+							<div class="movie-result" data-tmdbid="${movie.tmdbID}" tabindex="-1">
 								${movie.Title} (${movie.Year})
 							</div>
 						`).join('');
@@ -54,6 +77,11 @@ $(document).ready(function () {
 					} else {
 						$("#searchResults").hide();
 					}
+				},
+				error: function () {
+					$("#searchResults")
+						.html('<div class="search-error">Search unavailable</div>')
+						.show();
 				}
 			});
 		}, 300);
@@ -101,19 +129,24 @@ $(document).ready(function () {
 
 	// Handle movie selection
 	$(document).on('click', '.movie-result', function () {
-		const imdbID = $(this).data('imdbid');
+		const tmdbID = $(this).data('tmdbid');
 
 		$.ajax({
-			url: `api/omdb/movie?id=${imdbID}`,
+			url: `api/movie/details?id=${tmdbID}`,
 			method: 'GET',
 			success: function (response) {
 				if (response.Response === "True") {
 					$("#filmSearch").val(response.Title);
-					$("#filmURL").val(`https://www.imdb.com/title/${imdbID}/`);
+					$("#filmURL").val(`https://www.themoviedb.org/movie/${response.tmdbID}`);
 					$("#synopsisArea").val(response.Plot);
 					$("#searchResults").hide();
 					selectedIndex = -1;
 				}
+			},
+			error: function () {
+				$("#searchResults")
+					.html('<div class="search-error">Could not load movie details</div>')
+					.show();
 			}
 		});
 	});
@@ -412,7 +445,18 @@ $(document).ready(function () {
 		refreshPreview();
 	});
 
-	// Also refresh after OMDB autofill
+	// Re-trigger search when filters change
+	$(document).on('change input', '#excludeVideos, #minPopularity, #maxPopularity, #minVoteCount, #maxVoteCount, #minVoteAverage, #maxVoteAverage, #minReleaseDate, #maxReleaseDate', function () {
+		const searchTerm = $("#filmSearch").val();
+		if (searchTerm && searchTerm.length >= 2) {
+			clearTimeout(searchTimeout);
+			searchTimeout = setTimeout(() => {
+				$("#filmSearch").trigger('input');
+			}, 300);
+		}
+	});
+
+	// Also refresh after movie autofill
 	$(document).on('click', '.movie-result', function () {
 		setTimeout(refreshPreview, 0);
 	});

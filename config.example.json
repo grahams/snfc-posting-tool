@@ -17,8 +17,8 @@
       "link": "https://example.com/cinemas/example"
     }
   ],
-  "omdb": {
-    "apiKey": "YOUR_OMDB_API_KEY"
+  "moviething": {
+    "baseUrl": "http://moviething:3000/api"
   },
   "mailingList": {
     "enabled": true,
