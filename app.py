@@ -111,25 +111,97 @@ def preview_newsletter():
         # Return error but 200 so the client can display it inline
         return jsonify({ 'html': '', 'error': str(e) })
 
-@app.route('/api/omdb/search')
-def omdb_search():
+@app.route('/api/movie/search')
+def movie_search():
     query = request.args.get('q', '')
     if not query:
         return jsonify({'error': 'Search query is required'}), 400
-    
-    api_key = config['omdb']['apiKey']
-    response = requests.get(f'http://www.omdbapi.com/?apikey={api_key}&s={query}&type=movie')
-    return jsonify(response.json())
 
-@app.route('/api/omdb/movie')
-def omdb_movie():
-    imdb_id = request.args.get('id', '')
-    if not imdb_id:
-        return jsonify({'error': 'IMDB ID is required'}), 400
-    
-    api_key = config['omdb']['apiKey']
-    response = requests.get(f'http://www.omdbapi.com/?apikey={api_key}&i={imdb_id}&plot=full')
-    return jsonify(response.json())
+    base_url = config.get('moviething', {}).get('baseUrl', '')
+    if not base_url:
+        return jsonify({'error': 'moviething not configured'}), 500
+
+    payload = {'title': query}
+    for param, key in [
+        ('exclude_videos', 'exclude_videos'),
+        ('min_popularity', 'min_popularity'),
+        ('max_popularity', 'max_popularity'),
+        ('min_vote_count', 'min_vote_count'),
+        ('max_vote_count', 'max_vote_count'),
+        ('min_vote_average', 'min_vote_average'),
+        ('max_vote_average', 'max_vote_average'),
+        ('min_release_date', 'min_release_date'),
+        ('max_release_date', 'max_release_date'),
+    ]:
+        val = request.args.get(param)
+        if val is not None and val != '':
+            if param == 'exclude_videos':
+                payload[key] = val.lower() in ('true', '1', 'yes')
+            elif 'date' in param:
+                payload[key] = val
+            else:
+                try:
+                    payload[key] = float(val)
+                except ValueError:
+                    pass
+
+    headers = {}
+    authentik_user = request.headers.get('x-authentik-username')
+    if authentik_user:
+        headers['x-authentik-username'] = authentik_user
+
+    try:
+        resp = requests.post(
+            f'{base_url}/searchMovie',
+            data={'json': json.dumps(payload)},
+            headers=headers,
+            timeout=10,
+        )
+        data = resp.json()
+        results = []
+        for movie in data.get('Search', []):
+            results.append({
+                'Title': movie.get('Title', ''),
+                'Year': movie.get('Year', ''),
+                'tmdbID': movie.get('tmdbID', ''),
+                'Poster': movie.get('Poster', ''),
+            })
+        return jsonify({'Search': results, 'Response': 'True' if results else 'False'})
+    except requests.RequestException:
+        return jsonify({'Search': [], 'error': 'Movie search unavailable'})
+
+
+@app.route('/api/movie/details')
+def movie_details():
+    tmdb_id = request.args.get('id', '')
+    if not tmdb_id:
+        return jsonify({'error': 'TMDB ID is required'}), 400
+
+    base_url = config.get('moviething', {}).get('baseUrl', '')
+    if not base_url:
+        return jsonify({'error': 'moviething not configured'}), 500
+
+    headers = {}
+    authentik_user = request.headers.get('x-authentik-username')
+    if authentik_user:
+        headers['x-authentik-username'] = authentik_user
+
+    try:
+        resp = requests.post(
+            f'{base_url}/getMovieDetails',
+            data={'json': json.dumps({'tmdbID': int(tmdb_id)})},
+            headers=headers,
+            timeout=10,
+        )
+        data = resp.json()
+        return jsonify({
+            'Title': data.get('Title', ''),
+            'imdbID': data.get('imdbID', ''),
+            'Plot': data.get('Plot', ''),
+            'Response': 'True' if data.get('Title') else 'False',
+        })
+    except requests.RequestException:
+        return jsonify({'error': 'Movie details unavailable'})
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
