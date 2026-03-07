@@ -77,6 +77,11 @@ $(document).ready(function () {
 					} else {
 						$("#searchResults").hide();
 					}
+				},
+				error: function () {
+					$("#searchResults")
+						.html('<div class="movie-result">Search unavailable</div>')
+						.show();
 				}
 			});
 		}, 300);
@@ -137,6 +142,11 @@ $(document).ready(function () {
 					$("#searchResults").hide();
 					selectedIndex = -1;
 				}
+			},
+			error: function () {
+				$("#searchResults")
+					.html('<div class="movie-result">Could not load movie details</div>')
+					.show();
 			}
 		});
 	});

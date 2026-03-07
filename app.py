@@ -168,7 +168,7 @@ def movie_search():
             })
         return jsonify({'Search': results, 'Response': 'True' if results else 'False'})
     except requests.RequestException:
-        return jsonify({'Search': [], 'error': 'Movie search unavailable'})
+        return jsonify({'Search': [], 'error': 'Movie search unavailable'}), 502
 
 
 @app.route('/api/movie/details')
@@ -206,7 +206,7 @@ def movie_details():
             'Response': 'True' if data.get('Title') else 'False',
         })
     except requests.RequestException:
-        return jsonify({'error': 'Movie details unavailable'})
+        return jsonify({'error': 'Movie details unavailable'}), 502
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
