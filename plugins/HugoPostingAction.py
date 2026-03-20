@@ -50,6 +50,7 @@ class HugoPostingAction(BasePostingAction):
 title: >
     {nl.generate_subject()}
 date: "{datetime.now().strftime('%Y-%m-%dT%H:%M:%S-00:00')}"
+year: {date.strftime('%Y')}
 draft: false
 tags: ["newsletter"]
 ---
