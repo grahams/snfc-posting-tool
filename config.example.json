@@ -54,5 +54,12 @@
     "service": "https://bsky.social",
     "handle": "you.example.bsky.social",
     "appPassword": "YOUR_BSKY_APP_PASSWORD"
+  },
+  "listmonk": {
+    "enabled": false,
+    "url": "https://lists.example.com",
+    "username": "YOUR_LISTMONK_API_USERNAME",
+    "password": "YOUR_LISTMONK_API_PASSWORD",
+    "listIds": [1]
   }
 }
