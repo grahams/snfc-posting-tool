@@ -32,7 +32,7 @@ uritemplate==4.1.1
 urllib3==2.6.3
 Werkzeug==3.1.6
 wheel==0.46.2
-GitPython==3.1.42
+GitPython==3.1.47
 markdownify==0.14.1
 beautifulsoup4==4.12.3
 aiosmtpd==1.4.6
