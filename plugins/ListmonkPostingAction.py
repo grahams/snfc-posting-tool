@@ -29,6 +29,7 @@ class ListmonkPostingAction(BasePostingAction):
         # Create the campaign
         campaign_payload = {
             "name": subject,
+            "from_email": "newsletter@sundaynightfilmclub.com",
             "subject": subject,
             "body": body,
             "content_type": "html",
