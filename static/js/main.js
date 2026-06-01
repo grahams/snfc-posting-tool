@@ -31,6 +31,8 @@ $(document).ready(function () {
 		clearTimeout(searchTimeout);
 		const searchTerm = $(this).val();
 		selectedIndex = -1;
+		$("#filmYear").val('');
+		$("#filmRuntime").val('');
 
 		if (searchTerm.length < 2) return;
 
@@ -139,6 +141,8 @@ $(document).ready(function () {
 					$("#filmSearch").val(response.Title);
 					$("#filmURL").val(`https://www.themoviedb.org/movie/${response.tmdbID}`);
 					$("#synopsisArea").val(response.Plot);
+					$("#filmYear").val(response.Year || '');
+					$("#filmRuntime").val(response.Runtime || '');
 					$("#searchResults").hide();
 					selectedIndex = -1;
 				}
@@ -327,6 +331,8 @@ $(document).ready(function () {
 				wearing: $("#wearing").val() || '',
 				showTime: $("#showTime").val() || '',
 				plotSynopsis: $("#synopsisArea").val() || '',
+				filmYear: $("#filmYear").val() || '',
+				filmRuntime: $("#filmRuntime").val() || '',
 				useManualHTML: $useManualHTML.is(":checked"),
 				overrideHTML: $overrideHTML.val() || '',
 				overrideSubject: $overrideSubject.val() || null
