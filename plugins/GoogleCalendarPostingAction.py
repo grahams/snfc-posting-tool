@@ -23,21 +23,21 @@ class GoogleCalendarPostingAction(BasePostingAction):
         if p is None:
             raise ValueError("Invalid time format")
 
-        tens = p.group(1)
-        hour = p.group(2)
-        minute = p.group(4)
+        tens = p.group(1) or ''
+        digit = p.group(2)
+        minute = p.group(4) or '00'
         ampm = p.group(5)
 
-        if tens == '':
-            hour = '0' + hour
-        
-        if minute == '':
-            minute = '00'
-        
-        if ampm.startswith('p') or ampm.startswith('P'):
-            hour = int(hour) + 12
+        hour = int(tens + digit)
+        is_pm = ampm.lower().startswith('p')
 
-        return int(hour), int(minute)
+        # 12am is midnight (0); 12pm is noon (12); 1-11 pm are 13-23.
+        if hour == 12:
+            hour = 12 if is_pm else 0
+        elif is_pm:
+            hour += 12
+
+        return hour, int(minute)
 
     def execute(self, config, nl):
         self.config = config
