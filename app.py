@@ -68,6 +68,8 @@ def preview_newsletter():
         showTime = data.get('showTime', '')
         synopsis = data.get('plotSynopsis', '')
         override_subject = data.get('overrideSubject')
+        film_year = data.get('filmYear', '')
+        film_runtime = data.get('filmRuntime', '')
 
         # Resolve host and location URLs from config
         host_url = ''
@@ -94,6 +96,8 @@ def preview_newsletter():
             wearing,
             showTime,
             synopsis,
+            year=film_year,
+            runtime=film_runtime,
         )
 
         # Apply manual overrides if provided
@@ -253,7 +257,9 @@ def index():
                         (config["locations"][locationIndex]['link'] if (not use_manual and config['locations']) else ''),
                         form.get("wearing", ""),
                         form.get("showTime", ""),
-                        form.get("plotSynopsis", ""))
+                        form.get("plotSynopsis", ""),
+                        year=form.get("filmYear", ""),
+                        runtime=form.get("filmRuntime", ""))
 
         # If manual HTML override was provided, use it
         override_html = form.get('overrideHTML')
