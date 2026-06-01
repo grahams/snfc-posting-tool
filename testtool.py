@@ -111,6 +111,8 @@ def main(argv: List[str]) -> int:
     parser.add_argument("--wearing", default="a nametag")
     parser.add_argument("--time", dest="show_time", default="7:00pm")
     parser.add_argument("--synopsis", default="This is a test post, ignore it.")
+    parser.add_argument("--year", type=int, default=None, help="Film release year")
+    parser.add_argument("--runtime", type=int, default=None, help="Film runtime in minutes")
 
     args = parser.parse_args(argv)
 
@@ -141,6 +143,8 @@ def main(argv: List[str]) -> int:
         args.wearing,
         args.show_time,
         args.synopsis,
+        year=args.year,
+        runtime=args.runtime,
     )
 
     # Load plugins

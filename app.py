@@ -16,6 +16,31 @@ with open(os.path.join(scriptPath, "config.json"), "r") as f:
 
 pluginList = {}
 
+def _extract_year(payload):
+    raw = payload.get('Year') or payload.get('year')
+    if raw:
+        s = str(raw).strip()
+        if len(s) >= 4 and s[:4].isdigit():
+            return s[:4]
+    for key in ('release_date', 'releaseDate', 'Released'):
+        v = payload.get(key)
+        if v and isinstance(v, str) and len(v) >= 4 and v[:4].isdigit():
+            return v[:4]
+    return ''
+
+def _extract_runtime(payload):
+    for key in ('Runtime', 'runtime'):
+        v = payload.get(key)
+        if v in (None, '', 0):
+            continue
+        try:
+            n = int(str(v).strip().split()[0])
+        except (TypeError, ValueError):
+            continue
+        if n > 0:
+            return n
+    return 0
+
 def load_plugins():
     global scriptPath
 
@@ -68,6 +93,8 @@ def preview_newsletter():
         showTime = data.get('showTime', '')
         synopsis = data.get('plotSynopsis', '')
         override_subject = data.get('overrideSubject')
+        film_year = data.get('filmYear', '')
+        film_runtime = data.get('filmRuntime', '')
 
         # Resolve host and location URLs from config
         host_url = ''
@@ -94,6 +121,8 @@ def preview_newsletter():
             wearing,
             showTime,
             synopsis,
+            year=film_year,
+            runtime=film_runtime,
         )
 
         # Apply manual overrides if provided
@@ -205,6 +234,8 @@ def movie_details():
             'Title': data.get('Title', ''),
             'tmdbID': data.get('tmdbID', ''),
             'Plot': data.get('Plot', ''),
+            'Year': _extract_year(data),
+            'Runtime': _extract_runtime(data),
             'Response': 'True' if data.get('Title') else 'False',
         })
     except requests.RequestException:
@@ -253,7 +284,9 @@ def index():
                         (config["locations"][locationIndex]['link'] if (not use_manual and config['locations']) else ''),
                         form.get("wearing", ""),
                         form.get("showTime", ""),
-                        form.get("plotSynopsis", ""))
+                        form.get("plotSynopsis", ""),
+                        year=form.get("filmYear", ""),
+                        runtime=form.get("filmRuntime", ""))
 
         # If manual HTML override was provided, use it
         override_html = form.get('overrideHTML')

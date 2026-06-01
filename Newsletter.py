@@ -27,10 +27,11 @@ class Newsletter:
     override_subject: Optional[str] = None
 
     def __init__(self, city, clubURL, film, filmURL,
-                 host, hostURL, 
-                 location, locationURL, 
+                 host, hostURL,
+                 location, locationURL,
                  wearing,
-                 showTime, synopsis):
+                 showTime, synopsis,
+                 year=None, runtime=None):
         self.city = city
         self.clubURL = clubURL
         self.film = film.strip()
@@ -43,6 +44,8 @@ class Newsletter:
         self.showTime = self.normalize_time(showTime)
         self.synopsis = synopsis.strip()
         self.daySuffix = self.get_date_suffix(self.get_next_sunday().day)
+        self.year = self._normalize_year(year)
+        self.runtime = self._normalize_runtime(runtime)
         # Optional manual override of generated HTML
         self.override_html = None
         # Optional manual override of generated subject
@@ -55,6 +58,37 @@ class Newsletter:
 
     def get_date_suffix(self, d):
         return {1:'st',2:'nd',3:'rd'}.get(d%20, 'th')
+
+    @staticmethod
+    def _normalize_year(value):
+        if value is None or value == "":
+            return None
+        try:
+            y = int(str(value).strip())
+        except (TypeError, ValueError):
+            return None
+        return y if 1000 <= y <= 9999 else None
+
+    @staticmethod
+    def _normalize_runtime(value):
+        if value is None or value == "":
+            return None
+        try:
+            r = int(str(value).strip())
+        except (TypeError, ValueError):
+            return None
+        return r if r > 0 else None
+
+    def format_film_details(self) -> str:
+        current_year = self.get_next_sunday().year
+        parts = []
+        if self.year and self.year != current_year:
+            parts.append(str(self.year))
+        if self.runtime:
+            parts.append(f"{self.runtime}m")
+        if not parts:
+            return ""
+        return f" ({', '.join(parts)})"
 
     def normalize_time(self, time_str):
         """
@@ -149,6 +183,7 @@ class Newsletter:
             showTime=self.showTime,
             film=self.film,
             filmURL=self.filmURL,
+            film_details=self.format_film_details(),
             location=self.location,
             locationURL=self.locationURL,
             host=self.host,

@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import timedelta
 import os
 import re
 
@@ -23,21 +23,21 @@ class GoogleCalendarPostingAction(BasePostingAction):
         if p is None:
             raise ValueError("Invalid time format")
 
-        tens = p.group(1)
-        hour = p.group(2)
-        minute = p.group(4)
+        tens = p.group(1) or ''
+        digit = p.group(2)
+        minute = p.group(4) or '00'
         ampm = p.group(5)
 
-        if tens == '':
-            hour = '0' + hour
-        
-        if minute == '':
-            minute = '00'
-        
-        if ampm.startswith('p') or ampm.startswith('P'):
-            hour = int(hour) + 12
+        hour = int(tens + digit)
+        is_pm = ampm.lower().startswith('p')
 
-        return int(hour), int(minute)
+        # 12am is midnight (0); 12pm is noon (12); 1-11 pm are 13-23.
+        if hour == 12:
+            hour = 12 if is_pm else 0
+        elif is_pm:
+            hour += 12
+
+        return hour, int(minute)
 
     def execute(self, config, nl):
         self.config = config
@@ -67,12 +67,22 @@ class GoogleCalendarPostingAction(BasePostingAction):
         try:
             service = build("calendar", "v3", credentials=creds)
 
-            dateString = nl.get_next_sunday().strftime("%FT")
+            sunday = nl.get_next_sunday()
 
             (hours, minutes) = self.parse_time(nl.normalize_time(nl.showTime))
 
-            start_time = "%s%.2d:%.2d:00.000" % (dateString, hours, minutes)
-            end_time = "%s%.2d:%.2d:00.000" % (dateString, hours + 3, minutes)
+            start_dt = sunday.replace(hour=hours, minute=minutes, second=0, microsecond=0)
+
+            runtime_min = getattr(nl, 'runtime', None)
+            if runtime_min and runtime_min > 0:
+                total_minutes = runtime_min + 60
+            else:
+                total_minutes = 180  # legacy 3-hour default
+
+            end_dt = start_dt + timedelta(minutes=total_minutes)
+
+            start_time = start_dt.strftime("%Y-%m-%dT%H:%M:%S.000")
+            end_time = end_dt.strftime("%Y-%m-%dT%H:%M:%S.000")
 
             # Convert the event to Google Calendar format
             google_event = {
