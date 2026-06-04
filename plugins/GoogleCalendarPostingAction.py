@@ -17,6 +17,12 @@ class GoogleCalendarPostingAction(BasePostingAction):
     configSection = "googleCalendar"
     config = None
 
+    def lookup_address(self, location_name):
+        for loc in (self.config or {}).get('locations', []):
+            if loc.get('name') == location_name:
+                return loc.get('address') or ''
+        return ''
+
     def parse_time(self, t):
         p = re.search('^([0-1]?)([0-9])(:?)([0-9]{0,2})([aAPp]?.?)', t)
 
@@ -84,9 +90,20 @@ class GoogleCalendarPostingAction(BasePostingAction):
             start_time = start_dt.strftime("%Y-%m-%dT%H:%M:%S.000")
             end_time = end_dt.strftime("%Y-%m-%dT%H:%M:%S.000")
 
+            # Prefer the configured street address; fall back to the
+            # location name so the event still has something useful.
+            event_location = self.lookup_address(nl.location) or nl.location
+
+            # Google Calendar's description renderer doesn't collapse
+            # whitespace the way a browser does, so template indentation
+            # and newlines leak through as visible spacing. Flatten runs
+            # of whitespace to single spaces before sending.
+            description = re.sub(r'\s+', ' ', nl.generate_HTML()).strip()
+
             # Convert the event to Google Calendar format
             google_event = {
                 'summary': nl.generate_subject(),
+                'location': event_location,
                 'start': {
                     'dateTime': start_time,
                     'timeZone': 'America/New_York',
@@ -95,7 +112,7 @@ class GoogleCalendarPostingAction(BasePostingAction):
                     'dateTime': end_time,
                     'timeZone': 'America/New_York',
                 },
-                'description': nl.generate_HTML(),
+                'description': description,
             }
 
             

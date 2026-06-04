@@ -14,7 +14,8 @@
   "locations": [
     {
       "name": "Example Cinema",
-      "link": "https://example.com/cinemas/example"
+      "link": "https://example.com/cinemas/example",
+      "address": "123 Main Street, Boston, MA 02111"
     }
   ],
   "moviething": {

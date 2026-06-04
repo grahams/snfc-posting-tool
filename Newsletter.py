@@ -59,6 +59,16 @@ class Newsletter:
     def get_date_suffix(self, d):
         return {1:'st',2:'nd',3:'rd'}.get(d%20, 'th')
 
+    def _format_next_sunday_long(self):
+        # "%e" blank-pads single-digit days ("Jun  7") and "%-d" isn't
+        # portable to Windows. Build the day portion manually instead.
+        d = self.get_next_sunday()
+        return f"{d.strftime('%A, %b')} {d.day}"
+
+    def _format_next_sunday_short(self):
+        d = self.get_next_sunday()
+        return f"{d.strftime('%b')} {d.day}"
+
     @staticmethod
     def _normalize_year(value):
         if value is None or value == "":
@@ -159,7 +169,7 @@ class Newsletter:
     def generate_subject(self) -> str:
         if self.override_subject is not None:
             return self.override_subject
-        subject = f'"{self.film}" - {self.get_next_sunday().strftime("%b %d")}{self.daySuffix}'
+        subject = f'"{self.film}" - {self._format_next_sunday_short()}{self.daySuffix}'
         return subject
 
     def generate_HTML(self) -> str:
@@ -178,7 +188,7 @@ class Newsletter:
         rendered_template = template.render(
             city=self.city,
             clubURL=self.clubURL,
-            nextSunday=self.get_next_sunday().strftime("%A, %b %e"),
+            nextSunday=self._format_next_sunday_long(),
             daySuffix=self.daySuffix,
             showTime=self.showTime,
             film=self.film,
@@ -199,7 +209,7 @@ class Newsletter:
         if self.override_html is not None:
             return self.generate_plain_text()
 
-        resultText = f'"{self.film}" @ {self.location}. {self.get_next_sunday().strftime("%A, %b %e")}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
+        resultText = f'"{self.film}" @ {self.location}. {self._format_next_sunday_long()}{self.daySuffix} at {self.showTime}. Look for your host, {self.host}.'
         return resultText
 
     # Backward-compatibility alias (deprecated)
