@@ -1,0 +1,18 @@
+.git
+.github
+docs
+__pycache__
+*.pyc
+.venv
+venv
+
+# secrets / local state (mirrors .gitignore) — mount these at runtime instead
+.ssh
+config.json
+.postingtoolrc
+.client_secret.json
+credentials.dat
+credentials.json
+token.json
+compose.yml
+content
