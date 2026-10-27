@@ -1,13 +1,18 @@
-FROM python:latest
+FROM python:3.14-slim
 LABEL org.opencontainers.image.source="https://github.com/grahams/snfc-posting-tool"
 
-RUN echo 'deb [signed-by=/etc/apt/keyrings/hugo.gpg] https://hugo-apt.8hob.io latest main' | tee /etc/apt/sources.list.d/hugo.list
-RUN mkdir -p /etc/apt/keyrings && wget -O /etc/apt/keyrings/hugo.gpg https://hugo-apt.8hob.io/signing-key
-RUN apt-get update && apt-get install -y hugo
+# git + ssh are needed by the Hugo plugin (GitPython shells out to git)
+RUN apt-get update \
+    && apt-get upgrade -y \
+    && apt-get install -y --no-install-recommends git openssh-client \
+    && rm -rf /var/lib/apt/lists/*
 
-ADD . /project
 WORKDIR /project
-RUN pip install -r requirements.txt
+COPY requirements.txt .
+# pip isn't needed at runtime and its vendored deps (urllib3, msgpack) trip scanners
+RUN pip install --no-cache-dir -r requirements.txt \
+    && pip uninstall -y pip
+COPY . /project
 
 # Set user and group
 ARG user=appuser
